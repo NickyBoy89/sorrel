@@ -1,18 +1,18 @@
 <script lang="ts">
   import MenuItem from "./menuItem.svelte";
-  let {items = new Map()} = $props();
+  let {menuName, menuDate = new Date(), items = new Map()} = $props();
 </script>
 
-<div class="grid grid-cols-8">
+<section class="menu grid grid-cols-8">
   <div class="col-start-3 col-span-4 border-debu flex flex-col h-screen text-center menu-font">
-    <div class="menu-header mt-32 mb-8">
+    <section class="menu-header mt-32 mb-8">
       <h1 class="menu-title">
-        Victoria Night
+        {menuName}
       </h1>
       <h3 class="menu-date">
-        1 February 2025
+        {menuDate.getDate()} {new Intl.DateTimeFormat("en-US", {month: "long"}).format(menuDate)} {menuDate.getFullYear()}
       </h3>
-    </div>
+    </section>
 
     <section class="content flex-grow">
       {#each items as [menuSectionHeader, menuItems]}
@@ -27,9 +27,14 @@
       {/each}
     </section>
   </div>
-</div>
+</section>
 
 <style>
+  .menu {
+    background-color: #ffffff;
+    color: #000000;
+  }
+
   .menu-font {
     font-family: 'Times New Roman', Times, serif;
   }
