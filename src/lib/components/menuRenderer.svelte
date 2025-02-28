@@ -5,7 +5,7 @@
 
 <div class="grid grid-cols-8">
   <div class="col-start-3 col-span-4 border-debu flex flex-col h-screen text-center menu-font">
-    <div class="menu-header mt-32 mb-16">
+    <div class="menu-header mt-32 mb-8">
       <h1 class="menu-title">
         Victoria Night
       </h1>
@@ -17,7 +17,7 @@
     <section class="content flex-grow">
       {#each items as [menuSectionHeader, menuItems]}
         <div class="menu-section my-4">
-          <h2 class="menu-header">{menuSectionHeader}</h2>
+          <h2 class="menu-section-header">{menuSectionHeader}</h2>
           <ul>
             {#each menuItems as appetizer}
               <MenuItem name={appetizer.name} description={appetizer.description} />
@@ -35,10 +35,14 @@
   }
 
   .menu-title {
-    font-size: 6.25rem;
+    font-size: 4.25rem;
   }
 
   .menu-header {
+    font-size: 1.25rem;
+  }
+
+  .menu-section-header {
     font-size: 3.25rem;
   }
 </style>

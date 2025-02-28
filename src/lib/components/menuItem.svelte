@@ -2,7 +2,7 @@
   let {name, description} = $props();
 </script>
 
-<div class="menu-item">
+<div class="menu-item py-1">
   <div class="item-name">{name}</div>
   <div class="item-description">{description}</div>
 </div>
@@ -13,7 +13,7 @@
   }
 
   .item-description {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-style: italic;
   }
 </style>
