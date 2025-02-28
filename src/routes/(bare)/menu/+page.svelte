@@ -38,4 +38,4 @@
 
 </script>
 
-<MenuRenderer items={menuItems} />
+<MenuRenderer menuName="Victoria Night" items={menuItems} />

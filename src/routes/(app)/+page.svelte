@@ -2,6 +2,12 @@
   import MenuRenderer from "$lib/components/menuRenderer.svelte";
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-<MenuRenderer menuName="Example Menu"/>
+<div class="grid grid-cols-2">
+  <section class="menu-editor">
+    This is some example text
+  </section>
+  
+  <section class="menu-preview">
+    <MenuRenderer menuName="Tomorrow Night's Dinner" />
+  </section>
+</div>
