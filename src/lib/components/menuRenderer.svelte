@@ -3,7 +3,7 @@
   let {menuName, menuDate = new Date(), items = new Map()} = $props();
 </script>
 
-<section class="menu inline-block text-center menu-font px-8 h-max justify-center">
+<div class="menu inline-block text-center menu-font px-8 h-max justify-center w-full">
   <section class="menu-header mt-32 mb-8">
     <h1 class="menu-title">
       {menuName}
@@ -25,7 +25,7 @@
       </div> 
     {/each}
   </section>
-</section>
+</div>
 
 <style>
   .menu {

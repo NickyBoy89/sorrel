@@ -1,12 +1,13 @@
 <script lang="ts">
-  let { text, action } = $props();
+  let { text, action, color = "#d65d0e" } = $props();
 </script>
 
-<button class="px-4 rounded-sm cursor-pointer text-2xl" onclick={action}>{text}</button>
+<div class="button-container text-center">
+  <button class="px-3 py-1.5 rounded-sm cursor-pointer" onclick={action} style="background-color: {color};">{text}</button>
+</div>
 
 <style>
-  button {
-    display: inline-block;
-    background-color: #d65d0e;
+  .button-container {
+    font-size: 1rem;
   }
 </style>

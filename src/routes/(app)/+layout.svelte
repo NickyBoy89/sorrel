@@ -23,10 +23,9 @@
 	}
 </style>
 
-<Navbar />
-
 <section class="main grid grid-cols-8">
 	<div class="col-start-3 col-span-4 h-screen">
+		<Navbar />
 		{@render children()}
 	</div>
 </section>
