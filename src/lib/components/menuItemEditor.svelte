@@ -1,4 +1,6 @@
-<script lang="ts"></script>
+<script lang="ts">
+    let { name = "", description = "" } = $props();
+</script>
 
 <div class="menu-item-editor rounded-md p-4">
     <form action="" class="flex flex-col">
@@ -10,9 +12,9 @@
             <div class="col-start-5 text-right">Not saved</div>
         </div>
         <!-- <label for="edit-item-name">Name</label> -->
-        <input type="text" id="edit-item-name" name="edit-item-name" class="item-edit-input rounded-sm mt-2 pl-2" placeholder="Name of dish...">
+        <input type="text" id="edit-item-name" name="edit-item-name" class="item-edit-input rounded-sm mt-2 pl-2" placeholder="Name of dish..." value={name}>
         <!-- <label for="edit-item-desc">Description</label> -->
-        <input type="text" id="edit-item-desc" class="item-edit-input rounded-sm mt-2 pl-2" placeholder="Description (Optional)">
+        <input type="text" id="edit-item-desc" class="item-edit-input rounded-sm mt-2 pl-2" placeholder="Description (Optional)" value="{description}">
     </form>
 </div>
 

@@ -4,6 +4,18 @@
     import UiButton from "$lib/components/uiButton.svelte";
 
     let { data } = $props();
+
+    async function createMenuItem() {
+        await fetch(`http://localhost:9031/api/menu/${data.menuId}/create-item`, {
+            method: "POST",
+            body: new URLSearchParams({name: "", description: ""}),
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    function saveMenuItems() {
+    }
 </script>
 
 <div class="grid grid-cols-2">
@@ -14,8 +26,8 @@
             {/each}
         </div>
         <div class="flex justify-between mt-4">
-            <UiButton text="New" action={() => {alert("New menu item")}} color="#fb4934"/>
-            <UiButton text="Save" action={() => {alert("Save menu items")}} color="#98971a"/>
+            <UiButton text="New" action={createMenuItem} color="#fb4934"/>
+            <UiButton text="Save" action={saveMenuItems} color="#98971a"/>
         </div>
     </div>
 

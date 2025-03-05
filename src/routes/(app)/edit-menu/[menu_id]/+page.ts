@@ -9,6 +9,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
 
     return {
         menu: menu,
-        menuItems: items
+        menuItems: items,
+        menuId: params.menu_id
     }
 }
