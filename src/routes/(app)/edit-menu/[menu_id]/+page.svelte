@@ -14,7 +14,13 @@
         });
     }
 
-    function saveMenuItems() {
+    async function saveMenuItems() {
+        await fetch(`http://localhost:9031/api/menu/${data.menuId}/items/edit/1`, {
+            method: "POST",
+            body: new URLSearchParams({name: "Something", description: "Else"}),
+        }).catch((error) => {
+            console.log(error);
+        })
     }
 </script>
 
