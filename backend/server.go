@@ -20,6 +20,11 @@ type Menu struct {
 	Date time.Time `json:"date"`
 }
 
+type MenuItem struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 func initDb(db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS menus(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,6 +73,7 @@ func main() {
 	}
 
 	http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
+	http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
 	http.HandleFunc("/api/list-menus", handleListMenus)
 	http.HandleFunc("/api/create-menu", handleCreateMenu)
 
@@ -96,7 +102,46 @@ func handleGetMenu(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewEncoder(w).Encode(Menu{Id: id, Name: name, Date: date}); err != nil {
+		log.Info("error encoding menu items to json", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
+	menuItems := []MenuItem{}
+
+	rawMenuId := r.PathValue("menuId")
+	menuId, err := strconv.Atoi(rawMenuId)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	rows, err := db.Query("SELECT menu_id, name, description FROM items WHERE menu_id = ?", menuId)
+	if err != nil {
+		log.Error("error fetching menu items", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for rows.Next() {
+		var menuId int
+		var name, description string
+		if err := rows.Scan(&menuId, name, description); err != nil {
+			log.Error("error reading row for menu item", "error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		menuItems = append(menuItems, MenuItem{Name: name, Description: description})
+	}
+
+	if err := json.NewEncoder(w).Encode(menuItems); err != nil {
+		log.Error("error encoding menu items", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
