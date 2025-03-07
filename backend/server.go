@@ -76,11 +76,11 @@ func main() {
 	http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
 	http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
 	http.HandleFunc("/api/menu/{menuId}/items/edit/{itemId}", handleEditMenuItem)
-	http.HandleFunc("/api/list-menus", handleListMenus)
-	http.HandleFunc("/api/create-menu", handleCreateMenu)
+	http.HandleFunc("/api/menu/list", handleListMenus)
+	http.HandleFunc("/api/menu/create", handleCreateMenu)
 
 	log.Info("Serving files...", "port", serverPort)
-	log.Error("Error serving data", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil))
+	log.Error("Error serving data", "error", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil))
 }
 
 func handleGetMenu(w http.ResponseWriter, r *http.Request) {
