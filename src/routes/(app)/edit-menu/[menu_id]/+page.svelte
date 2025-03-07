@@ -2,6 +2,7 @@
     import MenuRenderer from "$lib/components/menuRenderer.svelte";
     import MenuItemEditor from "$lib/components/menuItemEditor.svelte";
     import UiButton from "$lib/components/uiButton.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
 
     let { data } = $props();
 
@@ -23,6 +24,8 @@
         })
     }
 </script>
+
+<Navbar />
 
 <div class="grid grid-cols-2">
     <div class="menu-editor p-6">

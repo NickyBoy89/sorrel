@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../../app.css';
-	import Navbar from '$lib/components/navbar.svelte';
 	let { children } = $props();
 </script>
 
@@ -25,7 +24,6 @@
 
 <section class="main grid grid-cols-8">
 	<div class="col-start-3 col-span-4 h-screen">
-		<Navbar />
 		{@render children()}
 	</div>
 </section>
