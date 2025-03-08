@@ -296,6 +296,8 @@ func handleCreateMenu(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleListMenus(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
 	menus := []Menu{}
 
 	rows, err := db.Query("SELECT id, name, date FROM menus")
