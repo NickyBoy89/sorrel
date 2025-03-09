@@ -1,10 +1,12 @@
 <script lang="ts">
-  import UiButton from "./uiButton.svelte";
+  import UiButtonLink from "./uiButtonLink.svelte";
+
+  let {backlinkHref = "/"} = $props();
 </script>
 
 <nav class="flex flex-row py-2">
   <div class="flex">
-    <UiButton text="← Back" action={() => alert(1)} />
+    <UiButtonLink text="← Back" href={backlinkHref} />
   </div>
   <!-- <div class="flex-grow">
       <a href="/">

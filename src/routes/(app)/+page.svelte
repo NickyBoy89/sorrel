@@ -7,6 +7,6 @@
 <h1 class="text-4xl">Manage Menus</h1>
 <div class="flex flex-col my-4">
   {#each data.menus as menu}
-    <MenuEditor menuName={menu.name}/>
+    <MenuEditor menuName={menu.name} id={menu.id}/>
   {/each}
 </div>

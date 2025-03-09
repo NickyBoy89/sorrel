@@ -25,7 +25,7 @@
     }
 </script>
 
-<Navbar />
+<Navbar backlinkHref="/" />
 
 <div class="grid grid-cols-2">
     <div class="menu-editor p-6">
