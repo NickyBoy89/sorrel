@@ -73,6 +73,7 @@ func main() {
 	}
 
 	http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
+	http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
 	http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
 	http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
 	http.HandleFunc("/api/menu/{menuId}/items/edit/{itemId}", handleEditMenuItem)
@@ -208,7 +209,7 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 
 	_ = menuId
 
-	rawItemId := r.PathValue("menuId")
+	rawItemId := r.PathValue("itemId")
 	itemId, err := strconv.Atoi(rawItemId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -241,6 +242,61 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := db.Exec("UPDATE items SET name = ?, description = ? WHERE id = ?", name, description, itemId); err != nil {
 		log.Error("error editing menu item", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func handleEditMenu(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	rawMenuId := r.PathValue("menuId")
+	menuId, err := strconv.Atoi(rawMenuId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	var name string
+	var date time.Time
+
+	for formKey, values := range r.Form {
+		var formValue string
+		if len(values) > 0 {
+			formValue = values[0]
+		} else {
+			http.Error(w, "error in query string: variable should have at least one value", http.StatusBadRequest)
+			return
+		}
+
+		switch formKey {
+		case "name":
+			name = formValue
+		case "date":
+			date, err = time.Parse(time.DateOnly, formValue)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+		default:
+			http.Error(w, "extra value provided: "+formKey, http.StatusBadRequest)
+			return
+		}
+	}
+
+	if name == "" || date.IsZero() {
+		http.Error(w, "error: missing required options: name, description", http.StatusBadRequest)
+		return
+	}
+
+	_, err = db.Exec("UPDATE menus SET name = ?, date = ? WHERE id = ?", name, date, menuId)
+	if err != nil {
+		log.Error("Error updating menu", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
