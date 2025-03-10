@@ -39,9 +39,10 @@
       <input type="date" id="edit-menu-date" name="date" class="block">
     </form>
     <UiButton text="Save" color="#458588" action={() => {
-      document.getElementById("edit-menu-form")?.submit();
+      const form = document.getElementById("edit-menu-form") as HTMLFormElement;
+      form.submit();
       closeEditor();
-      }} />
+    }} />
   </div>
 </div>
 
