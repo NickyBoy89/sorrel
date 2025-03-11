@@ -1,48 +1,45 @@
 <script lang="ts">
     import UiButton from "./uiButton.svelte";
-    import { onMount } from "svelte";
     import { backendRootURL } from "../../constants";
 
     let { menuName, menuDate = new Date(), id } = $props();
 
-    let editorElement: HTMLElement | null = null;
-    
-    onMount(() => {
-      editorElement = document.querySelector(".menu-editor");
-    })
+    let name = menuName;
+    let date = $state(menuDate);
 
-    function openEditor() {
-      editorElement?.classList.remove("hidden");
-      editorElement?.classList.add("flex");
+    let editorOpen = $state(false);
+
+    const handleMenuChange = async () => {
+      await fetch(`${backendRootURL}/api/menu/${id}/edit?${new URLSearchParams({
+          name: name,
+          date: date.toISOString().split("T")[0]
+        })}`).catch((error) => {
+        console.log(error);
+      });
     }
 
-    function closeEditor() {
-      editorElement?.classList.remove("flex");
-      editorElement?.classList.add("hidden");
+    const toggleEditor = () => {
+        editorOpen = !editorOpen;
     }
 </script>
 
 <div class="menu-item-editor rounded-md p-4 my-2 w-full">
   <div class="flex flex-row justify-between">
     <a href="/edit-menu/{id}" class="menu-title flex flex-row grow items-center">
-      <p class="text-3xl mb-1 inline-block">{menuName}</p> - {new Intl.DateTimeFormat("en-US", {month: "short"}).format(menuDate)} {menuDate.getDate()} {menuDate.getFullYear()}
+      <p class="text-3xl mb-1 inline-block">{menuName}</p> - {new Intl.DateTimeFormat("en-US", {month: "short"}).format(date)} {date.getDate()} {date.getFullYear()}
     </a>
     <div class="menu-options">
-      <UiButton text="Edit" action={openEditor}/>
+      <UiButton text="Edit" action={toggleEditor}/>
     </div>
   </div>
-  <div class="menu-editor hidden flex-col">
+  <div class="menu-editor {editorOpen ? "" : "hidden"} flex-col">
     <form action="{backendRootURL}/api/menu/{id}/edit" id="edit-menu-form" method="GET">
       <label for="edit-menu-name">Name:</label>
-      <input type="text" id="edit-menu-name" name="name" class="block">
+      <input type="text" id="edit-menu-name" name="name" class="block" value={menuName} onchange={handleMenuChange}>
       <label for="edit-menu-date">Date:</label>
-      <input type="date" id="edit-menu-date" name="date" class="block">
+      <input type="date" id="edit-menu-date" name="date" class="block date-editor" value={date.toISOString().split("T")[0]} onchange={handleMenuChange}>
     </form>
-    <UiButton text="Save" color="#458588" action={() => {
-      const form = document.getElementById("edit-menu-form") as HTMLFormElement | null;
-      form?.submit();
-      closeEditor();
-    }} />
+    <UiButton text="Close" color="#458588" action={toggleEditor} />
   </div>
 </div>
 

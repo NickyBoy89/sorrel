@@ -9,14 +9,12 @@
     let section = $state(itemSection);
 
     const updateValues = async () => {
-        await fetch(`${backendRootURL}/api/items/${itemId}/edit`, {
-            method: "POST",
-            body: new URLSearchParams({
+        await fetch(`${backendRootURL}/api/items/${itemId}/edit?${new URLSearchParams({
                 name: name,
                 description: description,
                 section: section
-            }),
-        }).catch((error) => {
+            })}`)
+            .catch((error) => {
             console.log(error);
         });
 
