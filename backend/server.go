@@ -21,9 +21,10 @@ type Menu struct {
 }
 
 type MenuItem struct {
-	Id          int    `json:"id,omitempty"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Id          int     `json:"id,omitempty"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Section     *string `json:"section,omitempty"`
 }
 
 func initDb(db *sql.DB) error {
@@ -44,6 +45,7 @@ func initDb(db *sql.DB) error {
 		menu_id INTEGER NOT NULL,
 		name TEXT NOT NULL,
 		description TEXT,
+		menu_section TEXT,
 		FOREIGN KEY(menu_id) REFERENCES menus(id)
 	);
 	`
@@ -77,9 +79,10 @@ func main() {
 	http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
 	http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
 	http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
-	http.HandleFunc("/api/menu/{menuId}/items/edit/{itemId}", handleEditMenuItem)
 	http.HandleFunc("/api/menu/list", handleListMenus)
 	http.HandleFunc("/api/menu/create", handleCreateMenu)
+	http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
+	http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
 
 	log.Info("Serving files...", "port", serverPort)
 	log.Error("Error serving data", "error", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil))
@@ -124,7 +127,7 @@ func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	rows, err := db.Query("SELECT id, name, description FROM items WHERE menu_id = ?", menuId)
+	rows, err := db.Query("SELECT id, name, description, section FROM items WHERE menu_id = ?", menuId)
 	if err != nil {
 		log.Error("error fetching menu items", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -134,13 +137,14 @@ func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var itemId int
 		var name, description string
-		if err := rows.Scan(&itemId, &name, &description); err != nil {
+		var section *string
+		if err := rows.Scan(&itemId, &name, &description, &section); err != nil {
 			log.Error("error reading row for menu item", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		menuItems = append(menuItems, MenuItem{Name: name, Description: description, Id: itemId})
+		menuItems = append(menuItems, MenuItem{Name: name, Description: description, Id: itemId, Section: section})
 	}
 
 	if err := json.NewEncoder(w).Encode(menuItems); err != nil {
@@ -201,15 +205,6 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rawMenuId := r.PathValue("menuId")
-	menuId, err := strconv.Atoi(rawMenuId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	_ = menuId
-
 	rawItemId := r.PathValue("itemId")
 	itemId, err := strconv.Atoi(rawItemId)
 	if err != nil {
@@ -217,7 +212,7 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var name, description string
+	var name, description, section string
 
 	for formKey, values := range r.Form {
 		var formValue string
@@ -233,6 +228,8 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 			name = formValue
 		case "description":
 			description = formValue
+		case "section":
+			section = formValue
 		default:
 			http.Error(w, "extra value provided: "+formKey, http.StatusBadRequest)
 			return
@@ -241,8 +238,26 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if _, err := db.Exec("UPDATE items SET name = ?, description = ? WHERE id = ?", name, description, itemId); err != nil {
+	if _, err := db.Exec("UPDATE items SET name = ?, description = ?, section = ? WHERE id = ?", name, description, section, itemId); err != nil {
 		log.Error("error editing menu item", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func handleDeleteMenuItem(w http.ResponseWriter, r *http.Request) {
+	rawItemId := r.PathValue("itemId")
+	itemId, err := strconv.Atoi(rawItemId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	_, err = db.Exec("DELETE FROM items WHERE id = ?", itemId)
+	if err != nil {
+		log.Error("Error deleting menu item", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

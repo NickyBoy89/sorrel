@@ -1,6 +1,10 @@
 <script lang="ts">
   import MenuItem from "./menuItem.svelte";
-  let {menuName, menuDate = new Date(), items = new Map()} = $props();
+  let {menuName, menuDate = new Date(), sections = new Map<string, any>()} = $props();
+  console.log(sections);
+
+  console.log(sections["Mains"]);
+  
 </script>
 
 <div class="menu inline-block text-center menu-font px-8 h-max justify-center w-full">
@@ -14,7 +18,7 @@
   </section>
 
   <section class="content flex-grow">
-    {#each items as [menuSectionHeader, menuItems]}
+    {#each sections as [menuSectionHeader, menuItems]}
       <div class="menu-section my-4">
         <h2 class="menu-section-header">{menuSectionHeader}</h2>
         <ul>
