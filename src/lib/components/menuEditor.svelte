@@ -25,7 +25,7 @@
 
 <div class="menu-item-editor rounded-md p-4 my-2 w-full">
   <div class="flex flex-row justify-between">
-    <a href="/edit-menu/{id}" class="menu-title flex flex-row grow items-center">
+    <a href="/edit-menu?menu-id={id}" class="menu-title flex flex-row grow items-center">
       <p class="text-3xl mb-1 inline-block">{menuName}</p> - {new Intl.DateTimeFormat("en-US", {month: "short"}).format(date)} {date.getDate()} {date.getFullYear()}
     </a>
     <div class="menu-options">
