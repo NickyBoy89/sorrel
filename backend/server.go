@@ -21,6 +21,7 @@ type Menu struct {
 }
 
 type MenuItem struct {
+	Id          int    `json:"id,omitempty"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
@@ -123,7 +124,7 @@ func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	rows, err := db.Query("SELECT menu_id, name, description FROM items WHERE menu_id = ?", menuId)
+	rows, err := db.Query("SELECT id, name, description FROM items WHERE menu_id = ?", menuId)
 	if err != nil {
 		log.Error("error fetching menu items", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -131,15 +132,15 @@ func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for rows.Next() {
-		var menuId int
+		var itemId int
 		var name, description string
-		if err := rows.Scan(&menuId, &name, &description); err != nil {
+		if err := rows.Scan(&itemId, &name, &description); err != nil {
 			log.Error("error reading row for menu item", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		menuItems = append(menuItems, MenuItem{Name: name, Description: description})
+		menuItems = append(menuItems, MenuItem{Name: name, Description: description, Id: itemId})
 	}
 
 	if err := json.NewEncoder(w).Encode(menuItems); err != nil {
