@@ -39,8 +39,8 @@
                 <UiButton text="Delete" action={deleteMenuItem} />
             </div>
         </div>
-        <input type="text" id="edit-item-name" name="edit-item-name" class="item-edit-input rounded-sm mt-2 pl-2" placeholder="Name of dish..." value={itemName} onchange={(event) => {name = event?.target?.value; updateValues();}}>
-        <input type="text" id="edit-item-desc" class="item-edit-input rounded-sm mt-2 pl-2" placeholder="Description (Optional)" value="{itemDesc}" onchange={(event) => {description = event?.target?.value; updateValues();}}>
+        <input type="text" id="edit-item-name" name="edit-item-name" class="ounded-sm w-auto mt-2 pl-2" placeholder="Name of dish..." value={itemName} onchange={(event) => {name = event?.target?.value; updateValues();}}>
+        <input type="text" id="edit-item-desc" class="rounded-sm mt-2 pl-2" placeholder="Description (Optional)" value="{itemDesc}" onchange={(event) => {description = event?.target?.value; updateValues();}}>
     </form>
 </div>
 
@@ -57,7 +57,7 @@
         height: 1.5rem;
     }
 
-    .item-edit-input {
+    input {
         background-color: #3c3836;
         height: 2rem;
     }

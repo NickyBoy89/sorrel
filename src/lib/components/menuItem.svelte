@@ -3,17 +3,9 @@
 </script>
 
 <div class="menu-item py-1">
-  <div class="item-name">{name}</div>
-  <div class="item-description">{description}</div>
+  <div class="text-3xl">{name}</div>
+  <div class="text-xl italic">{description}</div>
 </div>
 
 <style>
-  .item-name {
-    font-size: 2rem;
-  }
-
-  .item-description {
-    font-size: 1.25rem;
-    font-style: italic;
-  }
 </style>
