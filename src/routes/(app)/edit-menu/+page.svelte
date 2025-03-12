@@ -73,7 +73,7 @@
 
 <Navbar backlinkHref="/" />
 
-<div class="grid grid-cols-2">
+<div class="grid grid-cols-1 md:grid-cols-2">
     <div class="menu-editor p-6">
         <div class="menu-editors grid gap-4">
             {#each visibleItems as menuItem (menuItem.id)}
