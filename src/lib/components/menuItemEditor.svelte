@@ -30,7 +30,7 @@
 <div class="menu-item-editor rounded-md p-4">
     <form action="" class="flex flex-col">
         <div class="flex flex-row justify-between items-center">
-            <select name="edit-item-section" id="edit-item-section" class="rounded-sm menu-section-selector pl-2s" value={section} onchange={(event) => {section = event?.target?.value; updateValues();}}>
+            <select name="edit-item-section" id="edit-item-section" class="rounded-sm menu-section-selector pl-2" value={section} onchange={(event) => {section = event?.target?.value; updateValues();}}>
                 <option value="mains">Mains</option>
                 <option value="desserts">Desserts</option>
                 <option value="appetizers">Appetizers</option>
