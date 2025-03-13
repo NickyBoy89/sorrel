@@ -1,6 +1,5 @@
 <script lang="ts">;
   import MenuEditor from "$lib/components/menuEditor.svelte";
-  import { backendRootURL } from "../../constants";
   let { data } = $props();
 </script>
 

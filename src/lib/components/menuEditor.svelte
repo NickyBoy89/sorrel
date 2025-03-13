@@ -1,8 +1,9 @@
 <script lang="ts">
     import UiButton from "./uiButton.svelte";
     import { backendRootURL } from "../../constants";
+    import { DateTime } from "luxon";
 
-    let { menuName, menuDate = new Date(), id } = $props();
+    let { menuName, menuDate = new Date(), id, canEdit = true, relativeDate = true } = $props();
 
     let name = menuName;
     let date = $state(menuDate);
@@ -18,6 +19,13 @@
       });
     }
 
+    const displayedDate = (): string => {
+      if (!relativeDate) {
+        return date.toISOString().split("T")[0];
+      }
+      return DateTime.fromJSDate(date).toRelative({base: this});
+    }
+
     const toggleEditor = () => {
         editorOpen = !editorOpen;
     }
@@ -30,10 +38,10 @@
         {menuName}
       </div>
       <div class="menu-date mx-4">
-        {new Intl.DateTimeFormat("en-US", {month: "short"}).format(date)} {date.getDate()} {date.getFullYear()}
+        {displayedDate()}
       </div>
     </a>
-    <div class="menu-options flex items-center">
+    <div class="menu-options flex items-center {canEdit ? "" : "hidden"}">
       <UiButton text="Edit" action={toggleEditor}/>
     </div>
   </div>
