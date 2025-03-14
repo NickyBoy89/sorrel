@@ -16,13 +16,13 @@
 		} 
 	}
 
-	:global(html) {
+	.main {
 		background-color: var(--bg-color);
 		color: var(--fg-color);
 	}
 </style>
 
-<section class="grid grid-cols-8">
+<section class="main grid grid-cols-8">
 	<div class="xl:col-start-3 col-start-2 col-span-6 xl:col-span-4 h-screen">
 		{@render children()}
 	</div>

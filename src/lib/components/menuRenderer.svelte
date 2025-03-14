@@ -4,7 +4,7 @@
   
 </script>
 
-<div class="menu inline-block text-center menu-font px-8 h-max justify-center w-full">
+<div class="menu inline-block text-center menu-font px-8 h-max justify-center w-full h-full">
   <section class="menu-date mt-16 lg:mt-32 mb-8">
     <h1 class="text-6xl sm:text-7xl">
       {menuName}

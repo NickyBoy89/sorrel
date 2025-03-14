@@ -6,7 +6,7 @@
 <h1 class="text-4xl text-center my-4">Shared With You</h1>
 <div class="flex flex-col my-4">
     {#each data.menus as menu}
-        <MenuEditor menuName={menu.name} menuDate={new Date(menu.date)} id={menu.id} canEdit={false}/>
+        <MenuEditor menuName={menu.name} menuDate={new Date(menu.date)} menuId={menu.id} canEdit={false}/>
     {/each}
 </div>
 

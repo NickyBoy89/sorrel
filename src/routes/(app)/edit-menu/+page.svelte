@@ -7,6 +7,7 @@
 
     import { page } from "$app/state";
     import { onMount } from "svelte";
+    import UiButtonLink from "$lib/components/uiButtonLink.svelte";
 
     let menuId: string | null = null;
 
@@ -71,7 +72,11 @@
     let menuSections = $derived(itemsToSections(visibleItems));
 </script>
 
-<Navbar backlinkHref="/" />
+{#snippet backButton()}
+    <UiButtonLink text="← Back" href="/" />
+{/snippet}
+
+<Navbar mainItem={backButton} />
 
 <div class="grid grid-cols-1 md:grid-cols-2 my-4">
     <div class="menu-editor md:px-6 py-6">

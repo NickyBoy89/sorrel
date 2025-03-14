@@ -3,7 +3,7 @@
     import { backendRootURL } from "../../constants";
     import { DateTime } from "luxon";
 
-    let { menuName, menuDate = new Date(), id, canEdit = true, relativeDate = true } = $props();
+    let { menuName, menuDate = new Date(), menuId, canEdit = true, relativeDate = true } = $props();
 
     let name = menuName;
     let date = $state(menuDate);
@@ -11,7 +11,7 @@
     let editorOpen = $state(false);
 
     const handleMenuChange = async () => {
-      await fetch(`${backendRootURL}/api/menu/${id}/edit?${new URLSearchParams({
+      await fetch(`${backendRootURL}/api/menu/${menuId}/edit?${new URLSearchParams({
           name: name,
           date: date.toISOString().split("T")[0]
         })}`).catch((error) => {
@@ -23,7 +23,11 @@
       if (!relativeDate) {
         return date.toISOString().split("T")[0];
       }
-      return DateTime.fromJSDate(date).toRelative({base: this});
+      const relDate = DateTime.fromJSDate(date).toRelative({base: this});
+      if (relDate === null) {
+        return "unknown date"
+      }
+      return relDate
     }
 
     const toggleEditor = () => {
@@ -33,7 +37,7 @@
 
 <div class="menu-item-editor rounded-md p-4 my-2 w-full">
   <div class="flex flex-row justify-between">
-    <a href="/edit-menu?menu-id={id}" class="menu-title flex flex-col sm:flex-row grow items-center">
+    <a href="/{canEdit ? "edit-menu" : "menu"}?menu-id={menuId}" class="menu-title flex flex-col sm:flex-row grow items-center">
       <div class="menu-name text-2xl">
         {menuName}
       </div>
@@ -46,12 +50,12 @@
     </div>
   </div>
   <div class="menu-editor {editorOpen ? "" : "hidden"} flex-col">
-    <form action="{backendRootURL}/api/menu/{id}/edit" id="edit-menu-form" method="GET">
+    <div>
       <label for="edit-menu-name">Name:</label>
       <input type="text" id="edit-menu-name" name="name" class="block" value={menuName} onchange={handleMenuChange}>
       <label for="edit-menu-date">Date:</label>
       <input type="date" id="edit-menu-date" name="date" class="block date-editor" value={date.toISOString().split("T")[0]} onchange={handleMenuChange}>
-    </form>
+    </div>
     <UiButton text="Close" color="#458588" action={toggleEditor} />
   </div>
 </div>

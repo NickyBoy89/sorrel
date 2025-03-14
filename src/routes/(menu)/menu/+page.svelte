@@ -3,6 +3,8 @@
     import { page } from "$app/state";
     import { onMount } from "svelte";
     import { backendRootURL, menuDefaultSections } from "../../../constants.js";
+    import Navbar from "$lib/components/navbar.svelte";
+    import ShadowedButtonLink from "$lib/components/shadowedButtonLink.svelte";
 
     // menuItems.set("Mains", [
     //   new MenuItem("Spaghetti cacio e pepe", "Pasta prepared with a light sauce of cheese and pepper"),
@@ -78,4 +80,9 @@
     let menuSections = $derived(itemsToSections(visibleItems));
 </script>
 
+{#snippet backButton()}
+    <ShadowedButtonLink text="Back" href="/" color="#212121" bgColor="#ffffff"/>
+{/snippet}
+
+<Navbar mainItem={backButton} />
 <MenuRenderer menuName={menu.name} sections={menuSections} />
