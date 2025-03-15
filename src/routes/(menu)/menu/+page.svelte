@@ -31,7 +31,7 @@
     let menuId: string | null = null;
 
     let menu = $state({
-        name: "Placeholder",
+        name: "Loading Menu...",
         date: new Date(),
     });
     let visibleItems = $state([] as Array<MenuItemType>);
