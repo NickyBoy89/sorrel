@@ -6,8 +6,4 @@
 {@render children()}
 
 <style>
-  /* :global(html) {
-		background-color: var(--fg-color);
-		color: var(--bg-color);
-	} */
 </style>

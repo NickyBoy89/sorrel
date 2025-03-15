@@ -81,7 +81,11 @@
 </script>
 
 {#snippet backButton()}
-    <ShadowedButtonLink text="Back" href="/" color="#212121" bgColor="#ffffff"/>
+<div class="grid grid-cols-8">
+    <div class="col-start-2">
+        <ShadowedButtonLink text="Back" href="/" color="#212121" bgColor="#ffffff"/>
+    </div>
+</div>
 {/snippet}
 
 <Navbar mainItem={backButton} />
