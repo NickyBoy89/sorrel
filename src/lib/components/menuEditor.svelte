@@ -3,7 +3,7 @@
     import { backendRootURL } from "../../constants";
     import { DateTime } from "luxon";
 
-    let { menuName, menuDate = new Date(), menuId, canEdit = true, relativeDate = true } = $props();
+    let { menuName, menuDate, menuId, canEdit = true, relativeDate = true } = $props();
 
     let name = menuName;
     let date = $state(menuDate);
