@@ -7,7 +7,7 @@
     let statusMessage = $state("");
     let statusBorder = $state("#665c54");
 
-    let inviteCode;
+    let inviteCode: number;
 
     let notificationsPanelOpen = $state(false);
 
@@ -63,7 +63,10 @@
 
         await fetch(`${backendRootURL}/api/push/subscribe`, {
             method: "POST",
-            body: JSON.stringify(subscription?.toJSON()),
+            body: JSON.stringify({
+                userId: inviteCode,
+                sub: subscription?.toJSON()
+            }),
         });
 
         goto("/");
