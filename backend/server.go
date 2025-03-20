@@ -139,9 +139,6 @@ func handleCheckUserId(w http.ResponseWriter, r *http.Request) {
 	var isValidId bool
 
 	if err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?);", userId).Scan(&isValidId); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(err.Error())
-		}
 		log.Error("error testing for user id", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
