@@ -77,7 +77,8 @@ func initDb(db *sql.DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		category TEXT,
-		quantity TEXT NOT NULL
+		quantity TEXT NOT NULL,
+		checked BOOL NOT NULL
 	);
 	`); err != nil {
 		return err
