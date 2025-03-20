@@ -80,7 +80,7 @@ func SendNotificationToUser(userId int, data []byte) error {
 			return err
 		}
 
-		// Chrome: https://web.dev/articles/push-notifications-web-push-protocol#response-from-push-service
+		// Overview: https://pushpad.xyz/blog/list-of-http-status-codes-and-errors-returned-by-web-push-services
 		switch resp.StatusCode {
 		case 201:
 		case 429:
