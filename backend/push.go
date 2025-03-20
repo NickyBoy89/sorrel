@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/SherClockHolmes/webpush-go"
@@ -23,4 +25,8 @@ func handleVAPIDPublicKeyRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	w.Write([]byte(pub))
+}
+
+func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(io.ReadAll(r.Body))
 }

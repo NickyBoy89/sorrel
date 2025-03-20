@@ -92,6 +92,7 @@ func main() {
 
 	// Push
 	http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)
+	http.HandleFunc("/api/push/subscribe", handlePushSubscription)
 
 	log.Info("Serving files...", "port", serverPort)
 	log.Error("Error serving data", "error", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil))
