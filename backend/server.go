@@ -75,6 +75,12 @@ func main() {
 		return
 	}
 
+	InitializeVAPIDKeys()
+
+	// TODO: Remove this
+	log.Info("Generated VAPID keys", "public", pub)
+
+	// Application
 	http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
 	http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
 	http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
@@ -83,6 +89,9 @@ func main() {
 	http.HandleFunc("/api/menu/create", handleCreateMenu)
 	http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
 	http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
+
+	// Push
+	http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)
 
 	log.Info("Serving files...", "port", serverPort)
 	log.Error("Error serving data", "error", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil))
