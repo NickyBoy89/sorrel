@@ -9,6 +9,7 @@ import (
 	log "log/slog"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
@@ -68,6 +69,8 @@ func main() {
 	http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
 	http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
 
+	http.HandleFunc("/api/validate-id", handleCheckUserId)
+
 	// Push
 	http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)
 	http.HandleFunc("/api/push/subscribe", handlePushSubscription)
@@ -117,4 +120,36 @@ func readConfigFile(fileName string) error {
 	pub = conf.PublicKey
 
 	return nil
+}
+
+func handleCheckUserId(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	userId, err := strconv.Atoi(r.Form.Get("userId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	var isValidId bool
+
+	if err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?);", userId).Scan(&isValidId); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			panic(err.Error())
+		}
+		log.Error("error testing for user id", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isValidId {
+		http.Error(w, "Unknown or invalid user id", http.StatusUnauthorized)
+		return
+	}
+	r.Body.Close()
 }
