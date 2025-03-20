@@ -28,5 +28,7 @@ func handleVAPIDPublicKeyRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
 	fmt.Println(io.ReadAll(r.Body))
 }
