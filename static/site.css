@@ -7,5 +7,9 @@
   :root {
     --fg-color: #ffffff;
     --bg-color: #1d2021;
-  } 
+  }
+}
+
+html {
+  background-color: var(--bg-color);
 }

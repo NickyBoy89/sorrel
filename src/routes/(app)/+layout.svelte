@@ -1,7 +1,20 @@
 <script lang="ts">
 	import '../../app.css';
+	import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
 	let { children } = $props();
+
+	let userId;
+
+	onMount(() => {
+		userId = localStorage.getItem("userId");
+		if (userId === null) {
+			goto("/login");
+		}
+	})
 </script>
+
+<link rel="stylesheet" href="./site.css">
 
 <style>
 	:root {
