@@ -3,16 +3,26 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	log "log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
+	"github.com/SherClockHolmes/webpush-go"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const serverPort = 9031
+const configFileLocation = "sorrel-config.json"
+
+type Config struct {
+	PublicKey  string `json:"public_key"`
+	PrivateKey string `json:"private_key"`
+}
 
 type Menu struct {
 	Id   int       `json:"id"`
@@ -25,90 +35,6 @@ type MenuItem struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Section     *string `json:"section,omitempty"`
-}
-
-func initDb(db *sql.DB) error {
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS menus(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
-		date TIMESTAMP
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS items(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		menu_id INTEGER NOT NULL,
-		name TEXT NOT NULL,
-		description TEXT,
-		menu_section TEXT,
-		FOREIGN KEY(menu_id) REFERENCES menus(id)
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS users(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		display_name TEXT NOT NULL
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS notification_subscriptions(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,
-		endpoint TEXT NOT NULL,
-		keys_auto TEXT NOT NULL,
-		keys_p256dh TEXT NOT NULL,
-		FOREIGN KEY(user_id) REFERENCES users(id)
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS shared_menus(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		menu_id INTEGER NOT NULL,
-		user_id INTEGER NOT NULL,
-		FOREIGN KEY(menu_id) REFERENCES menus(id),
-		FOREIGN KEY(user_id) REFERENCES users(id)
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS shopping_lists(
-		id INTEGER PRIMARY KEY AUTOINCREMENT
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS shared_lists(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		shopping_list_id INTEGER NOT NULL,
-		user_id INTEGER NOT NULL,
-		FOREIGN KEY(shopping_list_id) REFERENCES shopping_lists(id),
-		FOREIGN KEY(user_id) REFERENCES users(id)
-	);
-	`); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS grocery_item(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
-		category TEXT,
-		quantity TEXT NOT NULL
-	);
-	`); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 var db *sql.DB
@@ -128,10 +54,47 @@ func main() {
 		return
 	}
 
-	InitializeVAPIDKeys()
+	if configFile, err := os.OpenFile(configFileLocation, os.O_RDWR, 0644); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			log.Info("config file does not exist, creating it now")
+			configFile, err = os.Create(configFileLocation)
+			if err != nil {
+				log.Error("error creating config file", "error", err.Error())
+				return
+			}
 
-	// TODO: Remove this
-	log.Info("Generated VAPID keys", "public", pub)
+			// Assign to global variables
+			priv, pub, err = webpush.GenerateVAPIDKeys()
+			if err != nil {
+				log.Error("error generating VAPID keys", "error", err)
+				return
+			}
+
+			conf := Config{
+				PrivateKey: priv,
+				PublicKey:  pub,
+			}
+
+			if err := json.NewEncoder(configFile).Encode(conf); err != nil {
+				log.Error("error writing config file", "error", err)
+				return
+			}
+		} else {
+			log.Error("error opening or creating config file", "error", err.Error(), "file", configFileLocation)
+			return
+		}
+	} else {
+		defer configFile.Close()
+
+		var conf Config
+		if err := json.NewDecoder(configFile).Decode(&conf); err != nil {
+			log.Error("error decoding config file", "error", err.Error())
+			return
+		}
+
+		priv = conf.PrivateKey
+		pub = conf.PublicKey
+	}
 
 	// Application
 	http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
