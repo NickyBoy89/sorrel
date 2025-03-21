@@ -59,6 +59,8 @@ func main() {
 		return
 	}
 
+	http.Handle("/", http.FileServer(http.Dir("../build")))
+
 	// Application
 	http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
 	http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
