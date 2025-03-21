@@ -1,6 +1,8 @@
 # Sqlite
 *.db
 
+backend/backend
+
 node_modules
 
 # Output
