@@ -2,6 +2,7 @@
 *.db
 
 backend/backend
+backend/*.json
 
 node_modules
 
