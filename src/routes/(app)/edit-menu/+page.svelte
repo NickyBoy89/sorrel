@@ -3,7 +3,6 @@
     import MenuItemEditor from "$lib/components/menuItemEditor.svelte";
     import UiButton from "$lib/components/uiButton.svelte";
     import Navbar from "$lib/components/navbar.svelte";
-    import { backendRootURL, menuDefaultSections } from "../../../constants.js";
 
     import { page } from "$app/state";
     import { onMount } from "svelte";
@@ -24,7 +23,7 @@
     })
 
     const fetchMenu = async () => {
-        menu = await fetch(`${backendRootURL}/api/menu/${menuId}`)
+        menu = await fetch(`/api/menu/${menuId}`)
         .then(resp => resp.json())
         .catch((error) => {
             console.log(error);
@@ -32,7 +31,7 @@
     }
 
     const fetchMenuItems = async () => {
-        await fetch(`${backendRootURL}/api/menu/${menuId}/items`)
+        await fetch(`/api/menu/${menuId}/items`)
             .then((resp) => resp.json())
             .then(respJson => visibleItems = respJson)
             .catch((error) => {
@@ -48,7 +47,7 @@
         let sections = new Map();
 
         items.forEach(menuItem => {
-            const sectionName = toUppercase(menuItem.section == null ? menuDefaultSections : menuItem.section);
+            const sectionName = toUppercase(menuItem.section == null ? "Mains" : menuItem.section);
             if (!sections.has(sectionName)) {
                 sections.set(sectionName, []);
             }
@@ -59,7 +58,7 @@
     }
 
     const createMenuItem = async () => {
-        await fetch(`${backendRootURL}/api/menu/${menuId}/create-item`, {
+        await fetch(`/api/menu/${menuId}/create-item`, {
             method: "POST",
             body: new URLSearchParams({name: "", description: ""}),
         }).catch((error) => {

@@ -1,6 +1,5 @@
 <script lang="ts">
     import UiButton from "./uiButton.svelte";
-    import { backendRootURL } from "../../constants";
     import { DateTime } from "luxon";
 
     let { menuName, menuDate, menuId, canEdit = true, relativeDate = true } = $props();
@@ -11,7 +10,7 @@
     let editorOpen = $state(false);
 
     const handleMenuChange = async () => {
-      await fetch(`${backendRootURL}/api/menu/${menuId}/edit?${new URLSearchParams({
+      await fetch(`/api/menu/${menuId}/edit?${new URLSearchParams({
           name: name,
           date: date.toISOString().split("T")[0]
         })}`).catch((error) => {
