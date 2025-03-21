@@ -1,2 +1,2 @@
-export const backendRootURL = "http://localhost:9031";
+export const backendRootURL = "";
 export const menuDefaultSections: string = "Mains";
