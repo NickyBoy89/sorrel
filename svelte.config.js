@@ -17,12 +17,14 @@ const config = {
 			fallback: undefined,
 			precompress: false,
 			strict: true
-		})
+		}),
+		files: {
+			serviceWorker: 'src/service-worker.ts',
+		},
+		serviceWorker: {
+			register: true,
+		},
 	},
-
-	serviceWorker: {
-		register: false
-	}
 };
 
 export default config;
