@@ -2,6 +2,7 @@
     import MenuRenderer from "$lib/components/menuRenderer.svelte";
     import { page } from "$app/state";
     import { onMount } from "svelte";
+    import { backendRootURL, menuDefaultSections } from "../../../constants.js";
     import Navbar from "$lib/components/navbar.svelte";
     import ShadowedButtonLink from "$lib/components/shadowedButtonLink.svelte";
 
@@ -42,7 +43,7 @@
     })
 
     const fetchMenu = async () => {
-        menu = await fetch(`/api/menu/${menuId}`)
+        menu = await fetch(`${backendRootURL}/api/menu/${menuId}`)
         .then(resp => resp.json())
         .catch((error) => {
             console.log(error);
@@ -50,7 +51,7 @@
     }
 
     const fetchMenuItems = async () => {
-        await fetch(`/api/menu/${menuId}/items`)
+        await fetch(`${backendRootURL}/api/menu/${menuId}/items`)
             .then((resp) => resp.json())
             .then(respJson => visibleItems = respJson)
             .catch((error) => {
@@ -66,7 +67,7 @@
         let sections = new Map();
 
         items.forEach(menuItem => {
-            const sectionName = toUppercase(menuItem.section == null ? "Mains" : menuItem.section);
+            const sectionName = toUppercase(menuItem.section == null ? menuDefaultSections : menuItem.section);
             if (!sections.has(sectionName)) {
                 sections.set(sectionName, []);
             }
