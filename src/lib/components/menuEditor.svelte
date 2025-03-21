@@ -6,7 +6,7 @@
     let { menuName, menuDate, menuId, canEdit = true, relativeDate = true } = $props();
 
     let name = menuName;
-    let date = $state(menuDate);
+    let date: Date = $state(menuDate);
 
     let editorOpen = $state(false);
 
@@ -17,6 +17,15 @@
         })}`).catch((error) => {
         console.log(error);
       });
+    };
+
+    const handlePushMenu = async () => {
+      await fetch(`${backendRootURL}/api/menu/share?${new URLSearchParams({
+        menuId: menuId,
+      })}`)
+      .catch((error) => {
+        console.error(error);
+      })
     }
 
     const displayedDate = (): string => {
@@ -57,6 +66,7 @@
       <input type="date" id="edit-menu-date" name="date" class="block date-editor" value={date.toISOString().split("T")[0]} onchange={handleMenuChange}>
     </div>
     <UiButton text="Close" color="#458588" action={toggleEditor} />
+    <UiButton text="Share" color="#d79921" action={handlePushMenu} />
   </div>
 </div>
 
