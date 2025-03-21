@@ -1,0 +1,5 @@
+services:
+  webapp:
+    build: .
+    ports:
+      - "9031:9031"
