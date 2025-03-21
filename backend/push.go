@@ -52,6 +52,40 @@ func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
 	log.Info("received new subscription", "userId", sub.UserID)
 }
 
+func handleShareMenu(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if !r.Form.Has("menuId") {
+		http.Error(w, "error: menuId parameter required", http.StatusBadRequest)
+		return
+	}
+
+	users, err := db.Query("SELECT id FROM notification_subscriptions")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for users.Next() {
+		var userId int
+		if err := users.Scan(&userId); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err := SendNotificationToUser(userId, []byte("Test")); err != nil {
+			log.Error("error sending notification", "error", err)
+			http.Error(w, "error sending notification", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func SendNotificationToUser(userId int, data []byte) error {
 	subs, err := db.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE id = ?", userId)
 	if err != nil {

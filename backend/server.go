@@ -68,6 +68,7 @@ func main() {
 	http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
 	http.HandleFunc("/api/menu/list", handleListMenus)
 	http.HandleFunc("/api/menu/create", handleCreateMenu)
+	http.HandleFunc("/api/menu/share", handleShareMenu)
 	http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
 	http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
 
