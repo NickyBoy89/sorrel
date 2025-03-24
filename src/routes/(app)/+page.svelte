@@ -1,14 +1,11 @@
 <script lang="ts">;
     import MenuEditor from "$lib/components/menuEditor.svelte";
     import { backendRootURL } from "../../constants.js";
-    let { data } = $props();
-
-    const menuList = fetch(`${backendRootURL}/api/menu/list`).then((resp) => resp.json())
 </script>
 
 <h1 class="text-4xl text-center my-4">Shared With You</h1>
 <div class="flex flex-col my-4">
-    {#await menuList}
+    {#await fetch(`${backendRootURL}/api/menu/list`).then((resp) => resp.json())}
         Loading...
     {:then menus}
     {#each menus as menu}
