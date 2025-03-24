@@ -38,7 +38,7 @@ func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if _, err := db.Exec("INSERT INTO notification_subscriptions (user_id, endpoint, keys_auto, keys_p256dh) VALUES (?, ?, ?, ?)",
+	if _, err := db.Exec("INSERT INTO notification_subscriptions (user_id, endpoint, keys_auth, keys_p256dh) VALUES (?, ?, ?, ?)",
 		sub.UserID,
 		sub.Sub.Endpoint,
 		sub.Sub.Keys.Auth,
