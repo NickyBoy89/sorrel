@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	log "log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/SherClockHolmes/webpush-go"
 )
@@ -52,6 +54,11 @@ func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
 	log.Info("received new subscription", "userId", sub.UserID)
 }
 
+type PushMessage struct {
+	Message   string `json:"data"`
+	ActionUrl string `json:"url"`
+}
+
 func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
@@ -65,8 +72,35 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	menuId, err := strconv.Atoi(r.Form.Get("menuId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	users, err := db.Query("SELECT id FROM notification_subscriptions")
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var menuName string
+	if err := db.QueryRow("SELECT name FROM menus WHERE id = ?", menuId).Scan(&menuName); err != nil {
+		log.Error("error fetching menu data", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	message := fmt.Sprintf("A new menu has been shared with you: %s", menuName)
+
+	msg := PushMessage{
+		Message:   message,
+		ActionUrl: fmt.Sprintf("/menu?menu-id=%d", menuId),
+	}
+
+	encodedMessage, err := json.Marshal(msg)
+	if err != nil {
+		log.Error("error encoding message", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -78,7 +112,7 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := SendNotificationToUser(userId, []byte("Test")); err != nil {
+		if err := SendNotificationToUser(userId, encodedMessage); err != nil {
 			log.Error("error sending notification", "error", err)
 			http.Error(w, "error sending notification", http.StatusInternalServerError)
 			return
