@@ -13,7 +13,9 @@
                 name: name,
                 description: description,
                 section: section
-            })}`)
+            })}`, {
+                method: "POST",
+            })
             .catch((error) => {
             console.log(error);
         });
@@ -22,7 +24,7 @@
     };
 
     const deleteMenuItem = async () => {
-        await fetch(`${backendRootURL}/api/items/${itemId}/delete`).catch((error) => console.log(error));
+        await fetch(`${backendRootURL}/api/items/${itemId}/delete`, { method: "POST" }).catch((error) => console.log(error));
         onchange();
     }
 </script>

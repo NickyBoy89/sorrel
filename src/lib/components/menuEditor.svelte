@@ -14,7 +14,7 @@
       await fetch(`${backendRootURL}/api/menu/${menuId}/edit?${new URLSearchParams({
           name: name,
           date: date.toISOString().split("T")[0]
-        })}`).catch((error) => {
+        })}`, { method: "POST" }).catch((error) => {
         console.log(error);
       });
     };
@@ -22,7 +22,7 @@
     const handlePushMenu = async () => {
       await fetch(`${backendRootURL}/api/menu/share?${new URLSearchParams({
         menuId: menuId,
-      })}`)
+      })}`, { method: "POST" })
       .catch((error) => {
         console.error(error);
       })
