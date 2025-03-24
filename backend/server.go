@@ -85,11 +85,11 @@ func main() {
 }
 
 func readConfigFile(fileName string) error {
-	configFile, err := os.OpenFile(fileName, os.O_RDWR, 0644)
+	configFile, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Info("config file does not exist, creating it now")
-			configFile, err = os.Create(configFileLocation)
+			configFile, err = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
 			if err != nil {
 				return err
 			}
@@ -106,6 +106,10 @@ func readConfigFile(fileName string) error {
 			}
 
 			if err := json.NewEncoder(configFile).Encode(conf); err != nil {
+				return err
+			}
+
+			if _, err := configFile.Seek(0, 0); err != nil {
 				return err
 			}
 		} else {
