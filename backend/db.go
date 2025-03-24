@@ -36,7 +36,7 @@ func initDb(db *sql.DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,
 		endpoint TEXT NOT NULL,
-		keys_auto TEXT NOT NULL,
+		keys_auth TEXT NOT NULL,
 		keys_p256dh TEXT NOT NULL,
 		FOREIGN KEY(user_id) REFERENCES users(id)
 	);
