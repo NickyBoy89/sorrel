@@ -24,8 +24,8 @@ const config = {
 		serviceWorker: {
 			register: true,
 		},
-		prerender: {
-			handleHttpError: "warn",
+		paths: {
+			relative: false,
 		},
 	},
 };
