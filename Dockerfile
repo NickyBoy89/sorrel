@@ -1,11 +1,11 @@
 FROM golang:1.24.1-alpine3.21 AS gobuilder
 RUN apk add --no-cache gcc musl-dev
 
+WORKDIR /opt/sorrel
+
 COPY backend/go.mod backend/go.sum ./
 
 RUN go mod download
-
-WORKDIR /opt/sorrel
 
 COPY backend/ .
 
