@@ -47,7 +47,7 @@ func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	rows, err := db.Query("SELECT id, name, description, section FROM items WHERE menu_id = ?", menuId)
+	rows, err := db.Query("SELECT id, name, description, menu_section FROM items WHERE menu_id = ?", menuId)
 	if err != nil {
 		log.Error("error fetching menu items", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -158,7 +158,7 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if _, err := db.Exec("UPDATE items SET name = ?, description = ?, section = ? WHERE id = ?", name, description, section, itemId); err != nil {
+	if _, err := db.Exec("UPDATE items SET name = ?, description = ?, menu_section = ? WHERE id = ?", name, description, section, itemId); err != nil {
 		log.Error("error editing menu item", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
