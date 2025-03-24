@@ -40,6 +40,8 @@ self.addEventListener('fetch', (event) => {
 	// ignore POST requests etc
 	if (event.request.method !== 'GET') return;
 
+	if (event.request.url.includes('/api/')) return;
+
 	async function respond() {
 		const url = new URL(event.request.url);
 		const cache = await caches.open(CACHE);
@@ -87,10 +89,21 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('push', function (event: any) {
 	const payload = event.data?.text() ?? 'no payload';
+	const data = JSON.parse(payload);
 	const registration = self.registration as ServiceWorkerRegistration;
 	event.waitUntil(
-		registration.showNotification('SvelteKit Music Store', {
-			body: payload
+		registration.showNotification('Tea Water and Tunes', {
+			body: data.data,
+			data: {
+				url: data.url,
+			}
 		})
 	);
 } as EventListener);
+
+self.addEventListener('notificationclick', (event) => {
+	event.notification.close();
+	event.waitUntil(
+		clients.openWindow(event.notification.data.url)
+	);
+})
