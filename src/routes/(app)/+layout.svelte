@@ -14,7 +14,7 @@
 	})
 </script>
 
-<link rel="stylesheet" href="./site.css">
+<link rel="stylesheet" href="/site.css">
 
 <style>
 	:root {
