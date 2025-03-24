@@ -156,7 +156,13 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendNotificationToUser(userId int, data []byte) error {
-	subs, err := db.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE id = ?", userId)
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	subs, err := tx.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE id = ?", userId)
 	if err != nil {
 		return err
 	}
@@ -194,12 +200,16 @@ func SendNotificationToUser(userId int, data []byte) error {
 			log.Error("error: invalid request to Push service")
 		case 410, 404:
 			// Not valid, remove
-			if _, err := db.Exec("DELETE FROM notification_subscriptions WHERE id = ?", subscriptionId); err != nil {
+			if _, err := tx.Exec("DELETE FROM notification_subscriptions WHERE id = ?", subscriptionId); err != nil {
 				return err
 			}
 		}
 
 		resp.Body.Close()
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
 	}
 
 	return nil

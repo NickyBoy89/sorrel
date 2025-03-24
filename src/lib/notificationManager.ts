@@ -12,14 +12,21 @@ export const isSubscriptionValid = async (): Promise<boolean> => {
     const resp = await fetch(`${backendRootURL}/api/push/validate`, {
         method: "POST",
         body: JSON.stringify(subJson),
-    })
-
-    if (resp.status != 200) {
-        console.error(`failed to validate subcription: code ${resp.status}, message: ${resp.statusText}`);
+    }).then((resp) => {
+        if (resp.ok) {
+            return true;
+        } else if (resp.status == 404) {
+            return false;
+        } else {
+            console.error(`failed to validate subcription: code ${resp.status}, message: ${resp.statusText}`);
+            return false;
+        }
+    }).catch((error) => {
+        console.error(error);
         return false;
-    }
+    });
 
-    return true;
+    return false;
 }
 
 export const handleSubscribe = async (inviteCode: number) => {

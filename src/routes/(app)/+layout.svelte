@@ -13,10 +13,19 @@
 			goto("/login");
 		}
 
-		if (!isSubscriptionValid()) {
-			console.log("Resubscribing...");
-			handleSubscribe(Number.parseInt(userId as string));
-		}
+		(async () => {
+			console.log("Testing subscription...");
+
+			const isValid = await isSubscriptionValid();
+
+			console.log(`Valid: ${isValid}`);
+
+			if (!isValid) {
+				console.log("Resubscribing...");
+				await handleSubscribe(Number.parseInt(userId as string));
+			}
+			
+		})()
 	});
 </script>
 
