@@ -10,6 +10,11 @@ import (
 	"github.com/SherClockHolmes/webpush-go"
 )
 
+type PushMessage struct {
+	Message   string `json:"data"`
+	ActionUrl string `json:"url"`
+}
+
 var (
 	priv = ""
 	pub  = ""
@@ -54,9 +59,39 @@ func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
 	log.Info("received new subscription", "userId", sub.UserID)
 }
 
-type PushMessage struct {
-	Message   string `json:"data"`
-	ActionUrl string `json:"url"`
+func handleCheckSubscription(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "wrong method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	defer r.Body.Close()
+
+	var sub webpush.Subscription
+	if err := json.NewDecoder(r.Body).Decode(&sub); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if sub.Keys.P256dh != pub {
+		http.Error(w, "client and server key mismatch", http.StatusNotFound)
+		return
+	}
+
+	var hasEndpoint bool
+
+	if err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM notification_subscriptions WHERE endpoint = ?);", sub.Endpoint).Scan(&hasEndpoint); err != nil {
+		log.Error("error finding notification endpoint", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !hasEndpoint {
+		http.Error(w, "server does not have a subscription with the same endpoint", http.StatusNotFound)
+		return
+	}
 }
 
 func handleShareMenu(w http.ResponseWriter, r *http.Request) {

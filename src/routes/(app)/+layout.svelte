@@ -2,6 +2,7 @@
 	import '../../app.css';
 	import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+    import { handleSubscribe, isSubscriptionValid } from '$lib/notificationManager';
 	let { children } = $props();
 
 	let userId;
@@ -11,7 +12,12 @@
 		if (userId === null) {
 			goto("/login");
 		}
-	})
+
+		if (!isSubscriptionValid()) {
+			console.log("Resubscribing...");
+			handleSubscribe(Number.parseInt(userId as string));
+		}
+	});
 </script>
 
 <link rel="stylesheet" href="/site.css">

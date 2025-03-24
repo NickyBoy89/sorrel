@@ -1,7 +1,7 @@
 <script lang="ts">
     import Fa from 'svelte-fa'
     import { faBell } from '@fortawesome/free-solid-svg-icons'
-    import { backendRootURL } from '../../../constants';
+    import { handleSubscribe } from '$lib/notificationManager';
     import { goto } from '$app/navigation';
 
     let statusMessage = $state("");
@@ -40,35 +40,8 @@
         return true;
     };
 
-    const handleSubscribe = async () => {
-        const vapidKey = await fetch(`${backendRootURL}/api/push/public-key`).then((resp) => resp.text());
-
-        const registration = await navigator.serviceWorker.ready;
-
-        await registration.pushManager.getSubscription().then((sub) => {
-            sub?.unsubscribe().catch((error) => {
-                console.error("Error unsubscribing", error);
-                return;
-            })
-        })
-
-        const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: vapidKey
-        }).catch((error) => {
-            console.log(error);
-        });
-
-        console.log("Subscribed user...");
-
-        await fetch(`${backendRootURL}/api/push/subscribe`, {
-            method: "POST",
-            body: JSON.stringify({
-                userId: inviteCode,
-                sub: subscription?.toJSON()
-            }),
-        });
-
+    const subscribeUser = async () => {
+        await handleSubscribe(inviteCode);
         goto("/");
     }
 </script>
@@ -89,7 +62,7 @@
             <div class="flex flex-col gap-y-8 py-8 px-4">
                 <h2 class="text-xl">In order to deliver your menus, we need your permission to send you a notification when that happens.</h2>
                 <h2 class="text-md">No rush, click the bell below to enable notifications</h2>
-                <button onclick={handleSubscribe} class="flex justify-center object-none text-7xl cursor-pointer rounded-md px-4 py-3"><Fa icon={faBell} id="bell-icon" /></button>
+                <button onclick={subscribeUser} class="flex justify-center object-none text-7xl cursor-pointer rounded-md px-4 py-3"><Fa icon={faBell} id="bell-icon" /></button>
             </div>
             {/if}
         </div>
