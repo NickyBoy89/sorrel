@@ -1,7 +1,6 @@
 <script lang="ts">
   import MenuItem from "./menuItem.svelte";
-  let {menuName, menuDate = new Date(), sections = new Map<string, any>()} = $props();
-  
+  let {menuName, menuDate, sections = new Map<string, any>()} = $props();
 </script>
 
 <div class="menu inline-block text-center menu-font px-8 h-max justify-center w-full h-full">

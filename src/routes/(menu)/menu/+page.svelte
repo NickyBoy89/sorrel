@@ -5,6 +5,7 @@
     import { backendRootURL, menuDefaultSections } from "../../../constants.js";
     import Navbar from "$lib/components/navbar.svelte";
     import ShadowedButtonLink from "$lib/components/shadowedButtonLink.svelte";
+    import { toJsDate } from "$lib/tools.js";
 
     // menuItems.set("Mains", [
     //   new MenuItem("Spaghetti cacio e pepe", "Pasta prepared with a light sauce of cheese and pepper"),
@@ -32,7 +33,7 @@
 
     let menu = $state({
         name: "Loading Menu...",
-        date: new Date(),
+        date: "1970-01-01",
     });
     let visibleItems = $state([] as Array<MenuItemType>);
 
@@ -43,8 +44,12 @@
     })
 
     const fetchMenu = async () => {
-        menu = await fetch(`${backendRootURL}/api/menu/${menuId}`)
+        await fetch(`${backendRootURL}/api/menu/${menuId}`)
         .then(resp => resp.json())
+        .then((respJson) => {
+            menu.name = respJson.name;
+            menu.date = respJson.date;
+        })
         .catch((error) => {
             console.log(error);
         });
@@ -89,4 +94,4 @@
 {/snippet}
 
 <Navbar mainItem={backButton} />
-<MenuRenderer menuName={menu.name} sections={menuSections} />
+<MenuRenderer menuName={menu.name} sections={menuSections} menuDate={toJsDate(menu.date)} />

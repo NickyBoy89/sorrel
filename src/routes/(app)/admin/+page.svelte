@@ -3,6 +3,7 @@
   import UiButton from "$lib/components/uiButton.svelte";
   import { onMount } from "svelte";
   import { backendRootURL } from "../../../constants";
+  import { toJsDate } from "$lib/tools";
 
   let menus: Array<any> = $state([] as Array<MenuItemType>);
 
@@ -14,11 +15,6 @@
         console.error(error);
         return [];
       });
-  }
-
-  const toJsDate = (dateString: string): Date => {
-    const [year, monthNumber, day] = dateString.split("T")[0].split("-");
-    return new Date(Number.parseInt(year), Number.parseInt(monthNumber) - 1, Number.parseInt(day))
   }
 
   onMount(() => {

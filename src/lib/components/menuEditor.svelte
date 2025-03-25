@@ -33,8 +33,6 @@
         return date.toISOString().split("T")[0];
       }
 
-      console.log(date);
-
       const relDate = DateTime.fromJSDate(date).toRelativeCalendar();
       if (relDate === null) {
         return "unknown date"
