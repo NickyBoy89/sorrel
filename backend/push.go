@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	log "log/slog"
@@ -37,6 +38,8 @@ func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	log.Info("incoming subscription", "sub", sub)
 
 	if sub.Sub.Endpoint == "" || sub.Sub.Keys.Auth == "" || sub.Sub.Keys.P256dh == "" {
 		http.Error(w, "error: One of the fields was empty", http.StatusBadRequest)
@@ -75,7 +78,10 @@ func handleCheckSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Info("Received check for subscription", "sub", sub)
+
 	if sub.Keys.P256dh != pub {
+		log.Info("Keys did not match", "client", sub.Keys.P256dh, "server", pub)
 		http.Error(w, "client and server key mismatch", http.StatusNotFound)
 		return
 	}
@@ -113,12 +119,6 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := db.Query("SELECT id FROM notification_subscriptions")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	var menuName string
 	if err := db.QueryRow("SELECT name FROM menus WHERE id = ?", menuId).Scan(&menuName); err != nil {
 		log.Error("error fetching menu data", "error", err)
@@ -140,6 +140,21 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tx, err := db.Begin()
+	if err != nil {
+		log.Error("error beginning transaction", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	users, err := tx.Query("SELECT id FROM notification_subscriptions")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer users.Close()
+
 	for users.Next() {
 		var userId int
 		if err := users.Scan(&userId); err != nil {
@@ -147,20 +162,23 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := SendNotificationToUser(userId, encodedMessage); err != nil {
+		if err := SendNotificationToUser(tx, userId, encodedMessage); err != nil {
 			log.Error("error sending notification", "error", err)
 			http.Error(w, "error sending notification", http.StatusInternalServerError)
 			return
 		}
 	}
+
+	if err := tx.Commit(); err != nil {
+		log.Error("error committing notification changes", "error", err)
+		http.Error(w, "error committing notification changes", http.StatusInternalServerError)
+		return
+	}
 }
 
-func SendNotificationToUser(userId int, data []byte) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) error {
+
+	log.Debug("Started sending notifications to user", "userId", userId)
 
 	subs, err := tx.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE id = ?", userId)
 	if err != nil {
@@ -168,6 +186,7 @@ func SendNotificationToUser(userId int, data []byte) error {
 	}
 
 	for subs.Next() {
+		log.Info("Reading sub")
 		var subscriptionId int
 		var sub webpush.Subscription
 		if err := subs.Scan(
@@ -189,6 +208,8 @@ func SendNotificationToUser(userId int, data []byte) error {
 			return err
 		}
 
+		log.Debug("Sent notification", "status", resp.StatusCode)
+
 		// Overview: https://pushpad.xyz/blog/list-of-http-status-codes-and-errors-returned-by-web-push-services
 		switch resp.StatusCode {
 		case 201:
@@ -199,6 +220,7 @@ func SendNotificationToUser(userId int, data []byte) error {
 		case 400:
 			log.Error("error: invalid request to Push service")
 		case 410, 404:
+			log.Debug("Removed invalid notification")
 			// Not valid, remove
 			if _, err := tx.Exec("DELETE FROM notification_subscriptions WHERE id = ?", subscriptionId); err != nil {
 				return err
@@ -206,10 +228,6 @@ func SendNotificationToUser(userId int, data []byte) error {
 		}
 
 		resp.Body.Close()
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 
 	return nil
