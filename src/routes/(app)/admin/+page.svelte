@@ -16,7 +16,10 @@
       });
   }
 
-  
+  const toJsDate = (dateString: string): Date => {
+    const [year, monthNumber, day] = dateString.split("T")[0].split("-");
+    return new Date(Number.parseInt(year), Number.parseInt(monthNumber) - 1, Number.parseInt(day))
+  }
 
   onMount(() => {
     fetchMenus();
@@ -29,7 +32,7 @@
         method: "POST",
         body: new URLSearchParams({
           name: "New Menu",
-          date: `${now.getFullYear()}-${now.getMonth().toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`,
+          date: `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`,
         }),
     }).catch((error) => {
         console.log(error);
@@ -42,7 +45,7 @@
 <h1 class="text-4xl text-center my-4">Manage Menus</h1>
 <div class="flex flex-col my-4">
   {#each menus as menu}
-    <MenuEditor menuName={menu.name} menuDate={new Date(menu.date)} menuId={menu.id}/>
+    <MenuEditor menuName={menu.name} menuDate={toJsDate(menu.date)} menuId={menu.id}/>
   {/each}
   <UiButton text="New" action={createMenu} />
 </div>

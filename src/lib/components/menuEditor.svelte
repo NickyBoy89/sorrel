@@ -5,7 +5,7 @@
 
     let { menuName, menuDate, menuId, canEdit = true, relativeDate = true } = $props();
 
-    let name = menuName;
+    let name = $state(menuName);
     let date: Date = $state(menuDate);
 
     let editorOpen = $state(false);
@@ -32,7 +32,10 @@
       if (!relativeDate) {
         return date.toISOString().split("T")[0];
       }
-      const relDate = DateTime.fromJSDate(date).toRelative({base: this});
+
+      console.log(date);
+
+      const relDate = DateTime.fromJSDate(date).toRelativeCalendar();
       if (relDate === null) {
         return "unknown date"
       }
@@ -48,7 +51,7 @@
   <div class="flex flex-row justify-between">
     <a href="/{canEdit ? "edit-menu" : "menu"}?menu-id={menuId}" class="menu-title flex flex-col sm:flex-row grow items-center">
       <div class="menu-name text-2xl">
-        {menuName}
+        {name}
       </div>
       <div class="menu-date mx-4">
         {displayedDate()}
@@ -61,9 +64,16 @@
   <div class="menu-editor {editorOpen ? "" : "hidden"} flex-col">
     <div>
       <label for="edit-menu-name">Name:</label>
-      <input type="text" id="edit-menu-name" name="name" class="block" value={menuName} onchange={handleMenuChange}>
+      <input type="text" id="edit-menu-name" name="name" class="block" bind:value={name} onchange={handleMenuChange}>
       <label for="edit-menu-date">Date:</label>
-      <input type="date" id="edit-menu-date" name="date" class="block date-editor" value={date.toISOString().split("T")[0]} onchange={handleMenuChange}>
+      <input type="date" id="edit-menu-date" name="date" class="block date-editor" value={date.toISOString().split("T")[0]} onchange={(event: Event) => {
+        const dateStr = (event?.target as HTMLInputElement).value;
+        const [year, monthNumber, day] = dateStr.split("-");
+        date = new Date(Number.parseInt(year), Number.parseInt(monthNumber) - 1, Number.parseInt(day));
+        console.log(`Date changed to: ${date}`);
+        
+        handleMenuChange();
+      }}>
     </div>
     <UiButton text="Close" color="#458588" action={toggleEditor} />
     <UiButton text="Share" color="#d79921" action={handlePushMenu} />
