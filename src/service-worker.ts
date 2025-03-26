@@ -92,7 +92,7 @@ self.addEventListener('push', function (event: any) {
 	const data = JSON.parse(payload);
 	const registration = self.registration as ServiceWorkerRegistration;
 	event.waitUntil(
-		registration.showNotification('Tea Water and Tunes', {
+		registration.showNotification('Novak Society Cafe', {
 			body: data.data,
 			data: {
 				url: data.url,
