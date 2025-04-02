@@ -50,7 +50,7 @@
 	}
 </style>
 
-<section class="main grid grid-cols-8">
+<section class="grid grid-cols-8 bg-white dark:bg-neutral-800 text-neutral-900">
 	<div class="xl:col-start-3 col-start-2 col-span-6 xl:col-span-4 h-screen">
 		{@render children()}
 	</div>

@@ -3,7 +3,7 @@
     import { backendRootURL } from "../../constants";
     import { DateTime } from "luxon";
 
-    let { menuName, menuDate, menuId, canEdit = true, relativeDate = true } = $props();
+    let { menuName, menuDate, menuId, canEdit = false, relativeDate = true } = $props();
 
     let name = $state(menuName);
     let date: Date = $state(menuDate);
@@ -45,13 +45,13 @@
     }
 </script>
 
-<div class="menu-item-editor rounded-md p-4 my-2 w-full">
+<div class="rounded-md p-4 my-2 w-full bg-neutral-100 dark:bg-neutral-600 border border-neutral-300 shadow-sm">
   <div class="flex flex-row justify-between">
     <a href="/{canEdit ? "edit-menu" : "menu"}?menu-id={menuId}" class="menu-title flex flex-col sm:flex-row grow items-center">
-      <div class="menu-name text-2xl">
+      <div class="menu-name text-2xl text-black dark:text-white">
         {name}
       </div>
-      <div class="menu-date mx-4">
+      <div class="menu-date mx-4 text-black dark:text-white">
         {displayedDate()}
       </div>
     </a>
@@ -79,12 +79,14 @@
 </div>
 
 <style>
-  .menu-item-editor {
-      background-color: #665c54;
-  }
-
   input {
-      background-color: #3c3836;
+      background-color: var(--color-gray-400);
       height: 2rem;
   }
+
+  @media (prefers-color-scheme: dark) {
+		input {
+      background-color: var(--color-neutral-600);
+    }
+	}
 </style>

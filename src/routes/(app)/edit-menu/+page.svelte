@@ -73,7 +73,7 @@
 </script>
 
 {#snippet backButton()}
-    <UiButtonLink text="← Back" href="/" />
+    <UiButtonLink text="← Back" href="/admin" />
 {/snippet}
 
 <Navbar mainItem={backButton} />
