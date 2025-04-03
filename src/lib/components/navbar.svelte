@@ -1,12 +1,12 @@
 <script lang="ts">
-  let { mainItem = () => {}, items = () => {} } = $props()
+  let { mainItem = () => {}, children } = $props()
 </script>
 
 <nav class="flex flex-row py-2">
   <div class="flex-grow">
-      {@render mainItem()}
+    {@render mainItem()}
   </div>
-  <div class="flex flex-row items-center space-x-4 underline">
-    {@render items()}
+  <div class="flex flex-row items-center space-x-4 text-black dark:text-white">
+    {@render children?.()}
   </div>
 </nav>

@@ -72,7 +72,10 @@ func main() {
 	http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
 	http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
 
+	// User
 	http.HandleFunc("/api/validate-id", handleCheckUserId)
+	http.HandleFunc("/api/users", handleListUsers)
+	http.HandleFunc("/api/user", handleGetUser)
 
 	// Push
 	http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)

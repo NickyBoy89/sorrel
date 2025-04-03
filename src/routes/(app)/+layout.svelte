@@ -43,11 +43,6 @@
 			--bg-color: #1d2021;
 		} 
 	}
-
-	.main {
-		background-color: var(--bg-color);
-		color: var(--fg-color);
-	}
 </style>
 
 <section class="grid grid-cols-8 bg-white dark:bg-neutral-900 text-neutral-900">
