@@ -29,10 +29,10 @@
     }
 </script>
 
-<div class="rounded-md p-4 bg-white dark:bg-neutral-700 border border-gray-300 dark:border-none">
+<div class="rounded-md p-4 bg-white dark:bg-zinc-800 border border-zinc-700">
     <form action="" class="flex flex-col">
         <div class="flex flex-row justify-between items-center">
-            <select name="edit-item-section" id="edit-item-section" class="rounded-sm text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 pl-2" value={section} onchange={(event) => {section = event?.target?.value; updateValues();}}>
+            <select name="edit-item-section" id="edit-item-section" class="rounded-sm text-neutral-900 dark:text-white pl-2" value={section} onchange={(event) => {section = event?.target?.value; updateValues();}}>
                 <option value="mains">Mains</option>
                 <option value="desserts">Desserts</option>
                 <option value="appetizers">Appetizers</option>
@@ -41,17 +41,23 @@
                 <UiButton text="Delete" action={deleteMenuItem} />
             </div>
         </div>
-        <input type="text" id="edit-item-name" name="edit-item-name" class="rounded-sm w-auto bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white mt-2 pl-2" placeholder="Name of dish..." value={itemName} onchange={(event) => {name = event?.target?.value; updateValues();}}>
-        <input type="text" id="edit-item-desc" class="rounded-sm bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white mt-2 pl-2" placeholder="Description (Optional)" value="{itemDesc}" onchange={(event) => {description = event?.target?.value; updateValues();}}>
+        <input type="text" id="edit-item-name" name="edit-item-name" class="rounded-sm w-auto text-neutral-900 dark:text-white mt-2 pl-2" placeholder="Name of dish..." value={itemName} onchange={(event) => {name = event?.target?.value; updateValues();}}>
+        <input type="text" id="edit-item-desc" class="rounded-sm text-neutral-900 dark:text-white mt-2 pl-2" placeholder="Description (Optional)" value="{itemDesc}" onchange={(event) => {description = event?.target?.value; updateValues();}}>
     </form>
 </div>
 
 <style>
-    #edit-item-section {
-        height: 1.5rem;
-    }
-
-    input {
+    input,select {
+        background-color: var(--color-white);
+        border: 1px solid var(--color-zinc-700);
         height: 2rem;
     }
+
+    @media (prefers-color-scheme: dark) {
+        input,select {
+            background-color: var(--color-zinc-900);
+            border: 1px solid var(--color-zinc-700);
+            height: 2rem;
+        }
+	}
 </style>
