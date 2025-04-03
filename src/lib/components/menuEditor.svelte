@@ -48,7 +48,7 @@
 <div class="rounded-md p-4 my-2 w-full bg-neutral-100 dark:bg-zinc-800 border-1 border-zinc-700 shadow-sm">
   <div class="flex flex-row justify-between">
     <a href="/{canEdit ? "edit-menu" : "menu"}?menu-id={menuId}" class="menu-title flex flex-col sm:flex-row grow items-center">
-      <div class="menu-name text-2xl text-black dark:text-white">
+      <div class="menu-name text-center lg:text-left text-2xl text-black dark:text-white">
         {name}
       </div>
       <div class="menu-date mx-4 text-black dark:text-white">
