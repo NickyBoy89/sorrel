@@ -10,6 +10,12 @@
   }
 }
 
+@font-face {
+  font-family: 'Nunito';
+  src: url('/fonts/Nunito-VariableFont_wght.ttf') format('truetype');
+}
+
 html {
   background-color: var(--bg-color);
+  font-family: "Nunito", sans-serif;
 }
