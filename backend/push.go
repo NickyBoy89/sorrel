@@ -78,13 +78,7 @@ func handleCheckSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("Received check for subscription", "sub", sub)
-
-	if sub.Keys.P256dh != pub {
-		log.Info("Keys did not match", "client", sub.Keys.P256dh, "server", pub)
-		http.Error(w, "client and server key mismatch", http.StatusNotFound)
-		return
-	}
+	log.Debug("Received check for subscription", "sub", sub)
 
 	var hasEndpoint bool
 
