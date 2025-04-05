@@ -89,9 +89,12 @@ func handleCheckSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !hasEndpoint {
+		log.Debug("Subscription does not exist, resubscribing user")
 		http.Error(w, "server does not have a subscription with the same endpoint", http.StatusNotFound)
 		return
 	}
+
+	log.Debug("User was already subscribed")
 }
 
 func handleShareMenu(w http.ResponseWriter, r *http.Request) {

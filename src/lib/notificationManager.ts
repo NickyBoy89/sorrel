@@ -19,6 +19,8 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export const isSubscriptionValid = async (): Promise<boolean> => {
+    let valid = false;
+
     const registration = await navigator.serviceWorker.ready;
 
     const subJson = await registration.pushManager.getSubscription().then((sub) => sub?.toJSON()).catch((error) => console.error(error));
@@ -32,19 +34,18 @@ export const isSubscriptionValid = async (): Promise<boolean> => {
         body: JSON.stringify(subJson),
     }).then((resp) => {
         if (resp.ok) {
-            return true;
+            valid = true;
         } else if (resp.status == 404) {
-            return false;
+            valid = false;
         } else {
             console.error(`failed to validate subcription: code ${resp.status}, message: ${resp.statusText}`);
             return false;
         }
     }).catch((error) => {
         console.error(error);
-        return false;
     });
 
-    return false;
+    return valid;
 }
 
 export const handleSubscribe = async (inviteCode: number) => {
