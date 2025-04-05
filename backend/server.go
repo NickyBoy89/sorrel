@@ -14,10 +14,13 @@ import (
 
 	"github.com/SherClockHolmes/webpush-go"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/spf13/cobra"
 )
 
-const serverPort = 9031
-const configFileLocation = "sorrel-config.json"
+var (
+	serverPort = 9031
+	debug      = false
+)
 
 type Config struct {
 	PublicKey  string `json:"public_key"`
@@ -39,53 +42,68 @@ type MenuItem struct {
 
 var db *sql.DB
 
-func main() {
-	recipesDb, err := sql.Open("sqlite3", "recipes.db")
-	if err != nil {
-		log.Error("Error opening db", "error", err)
-		return
-	}
-	defer recipesDb.Close()
-	db = recipesDb
+func init() {
+	serveCommand.Flags().IntVar(&serverPort, "port", 9031, "The port to listen on")
+	serveCommand.Flags().BoolVar(&debug, "debug", false, "Enable debug logging")
+}
 
-	// Setup
-	if err := initDb(db); err != nil {
-		log.Error("error initializing database", "error", err)
-		return
-	}
+var serveCommand = &cobra.Command{
+	Use:   "serve",
+	Short: "starts the backend process",
+	Run: func(cmd *cobra.Command, args []string) {
 
-	if err := readConfigFile(configFileLocation); err != nil {
-		log.Error("error reading config file", "error", err)
-		return
-	}
+		if debug {
+			log.SetLogLoggerLevel(log.LevelDebug)
+			log.Debug("Debug logging enabled!")
+		}
 
-	http.Handle("/", http.FileServer(http.Dir("build/")))
+		recipesDb, err := sql.Open("sqlite3", "recipes.db")
+		if err != nil {
+			log.Error("Error opening db", "error", err)
+			return
+		}
+		defer recipesDb.Close()
+		db = recipesDb
 
-	// Application
-	http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
-	http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
-	http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
-	http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
-	http.HandleFunc("/api/menu/list", handleListMenus)
-	http.HandleFunc("/api/menu/create", handleCreateMenu)
-	http.HandleFunc("/api/menu/share", handleShareMenu)
-	http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
-	http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
+		// Setup
+		if err := initDb(db); err != nil {
+			log.Error("error initializing database", "error", err)
+			return
+		}
 
-	// User
-	http.HandleFunc("/api/validate-id", handleCheckUserId)
-	http.HandleFunc("/api/users", handleListUsers)
-	http.HandleFunc("/api/user", handleGetUser)
+		if err := readConfigFile(configFileLocation); err != nil {
+			log.Error("error reading config file", "error", err)
+			return
+		}
 
-	// Push
-	http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)
-	http.HandleFunc("/api/push/subscribe", handlePushSubscription)
-	http.HandleFunc("/api/push/validate", handleCheckSubscription)
+		http.Handle("/", http.FileServer(http.Dir("build/")))
 
-	log.Info("Serving files...", "port", serverPort)
-	log.Error("Error serving data",
-		"error", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil),
-	)
+		// Application
+		http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
+		http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
+		http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
+		http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
+		http.HandleFunc("/api/menu/list", handleListMenus)
+		http.HandleFunc("/api/menu/create", handleCreateMenu)
+		http.HandleFunc("/api/menu/share", handleShareMenu)
+		http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
+		http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
+
+		// User
+		http.HandleFunc("/api/validate-id", handleCheckUserId)
+		http.HandleFunc("/api/users", handleListUsers)
+		http.HandleFunc("/api/user", handleGetUser)
+
+		// Push
+		http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)
+		http.HandleFunc("/api/push/subscribe", handlePushSubscription)
+		http.HandleFunc("/api/push/validate", handleCheckSubscription)
+
+		log.Info("Serving files...", "port", serverPort)
+		log.Error("Error serving data",
+			"error", http.ListenAndServe(fmt.Sprintf(":%d", serverPort), nil),
+		)
+	},
 }
 
 func readConfigFile(fileName string) error {
