@@ -6,7 +6,6 @@ import (
 	"fmt"
 	log "log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/SherClockHolmes/webpush-go"
 )
@@ -100,24 +99,25 @@ func handleCheckSubscription(w http.ResponseWriter, r *http.Request) {
 func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if r.Method != http.MethodPost {
+		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
 	}
 
-	if !r.Form.Has("menuId") {
-		http.Error(w, "error: menuId parameter required", http.StatusBadRequest)
-		return
+	type ShareRequest struct {
+		MenuId  int   `json:"menuId"`
+		UserIds []int `json:"users"`
 	}
 
-	menuId, err := strconv.Atoi(r.Form.Get("menuId"))
-	if err != nil {
+	var req ShareRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	defer r.Body.Close()
 
 	var menuName string
-	if err := db.QueryRow("SELECT name FROM menus WHERE id = ?", menuId).Scan(&menuName); err != nil {
+	if err := db.QueryRow("SELECT name FROM menus WHERE id = ?", req.MenuId).Scan(&menuName); err != nil {
 		log.Error("error fetching menu data", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -127,7 +127,7 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 
 	msg := PushMessage{
 		Message:   message,
-		ActionUrl: fmt.Sprintf("/menu?menu-id=%d", menuId),
+		ActionUrl: fmt.Sprintf("/menu?menu-id=%d", req.MenuId),
 	}
 
 	encodedMessage, err := json.Marshal(msg)
@@ -137,6 +137,9 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Begin a transaction because we're going to read and delete invalid
+	// subscriptions at the same time
+
 	tx, err := db.Begin()
 	if err != nil {
 		log.Error("error beginning transaction", "error", err)
@@ -145,24 +148,16 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	users, err := tx.Query("SELECT id FROM notification_subscriptions")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer users.Close()
+	// Prepare a response
+	resp := make(map[int]bool)
 
-	for users.Next() {
-		var userId int
-		if err := users.Scan(&userId); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if err := SendNotificationToUser(tx, userId, encodedMessage); err != nil {
+	for _, userId := range req.UserIds {
+		if sent, err := SendNotificationToUser(tx, userId, encodedMessage); err != nil {
 			log.Error("error sending notification", "error", err)
 			http.Error(w, "error sending notification", http.StatusInternalServerError)
 			return
+		} else {
+			resp[userId] = sent
 		}
 	}
 
@@ -171,15 +166,23 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error committing notification changes", http.StatusInternalServerError)
 		return
 	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Error("error encoding menu share response", "error", err)
+		http.Error(w, "error encoding response", http.StatusInternalServerError)
+		return
+	}
 }
 
-func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) error {
+func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) (bool, error) {
+
+	var success bool
 
 	log.Debug("Started sending notifications to user", "userId", userId)
 
 	subs, err := tx.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE id = ?", userId)
 	if err != nil {
-		return err
+		return success, err
 	}
 
 	for subs.Next() {
@@ -192,7 +195,7 @@ func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) error {
 			&sub.Keys.Auth,
 			&sub.Keys.P256dh,
 		); err != nil {
-			return err
+			return success, err
 		}
 
 		resp, err := webpush.SendNotification(data, &sub, &webpush.Options{
@@ -202,7 +205,7 @@ func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) error {
 			TTL:             30,
 		})
 		if err != nil {
-			return err
+			return success, err
 		}
 
 		log.Debug("Sent notification", "status", resp.StatusCode)
@@ -210,6 +213,7 @@ func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) error {
 		// Overview: https://pushpad.xyz/blog/list-of-http-status-codes-and-errors-returned-by-web-push-services
 		switch resp.StatusCode {
 		case 201:
+			success = true
 		case 429:
 			log.Error("error: rate-limited by Push service")
 		case 413:
@@ -220,12 +224,12 @@ func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) error {
 			log.Debug("Removed invalid notification")
 			// Not valid, remove
 			if _, err := tx.Exec("DELETE FROM notification_subscriptions WHERE id = ?", subscriptionId); err != nil {
-				return err
+				return success, err
 			}
 		}
 
 		resp.Body.Close()
 	}
 
-	return nil
+	return success, nil
 }
