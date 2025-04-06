@@ -31,18 +31,4 @@
 
 <link rel="stylesheet" href="/site.css">
 
-<style>
-	:root {
-		--bg-color: #ffffff;
-		--fg-color: #000000;
-	}
-
-	@media (prefers-color-scheme: dark) {
-		:root {
-			--fg-color: #ffffff;
-			--bg-color: #212121;
-		} 
-	}
-</style>
-
 {@render children()}

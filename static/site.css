@@ -1,21 +1,16 @@
-:root {
-  --bg-color: #ffffff;
-  --fg-color: #000000;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fg-color: #ffffff;
-    --bg-color: #1d2021;
-  }
-}
-
 @font-face {
   font-family: 'Nunito';
   src: url('/fonts/Nunito-VariableFont_wght.ttf') format('truetype');
 }
 
 html {
-  background-color: var(--bg-color);
+  color: black;
+  background-color: var(--color-neutral-900);
   font-family: "Nunito", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color: white;
+  }
 }
