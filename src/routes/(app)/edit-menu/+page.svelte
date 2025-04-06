@@ -79,7 +79,7 @@
 <Navbar mainItem={backButton} />
 
 <div class="grid grid-cols-1 md:grid-cols-2 my-4">
-    <div class="menu-editor md:px-6 py-6">
+    <div class="menu-editor md:px-6 py-6 px-4">
         <div class="menu-editors grid gap-4">
             {#each visibleItems as menuItem (menuItem.id)}
                 <MenuItemEditor itemId={menuItem.id} name={menuItem.name} description={menuItem.description} section={menuItem.section} onchange={fetchMenuItems} />

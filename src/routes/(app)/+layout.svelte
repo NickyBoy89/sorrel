@@ -40,13 +40,9 @@
 	@media (prefers-color-scheme: dark) {
 		:root {
 			--fg-color: #ffffff;
-			--bg-color: #1d2021;
+			--bg-color: #212121;
 		} 
 	}
 </style>
 
-<section class="grid grid-cols-8 bg-white dark:bg-neutral-900 text-neutral-900">
-	<div class="xl:col-start-3 col-start-2 col-span-6 xl:col-span-4 h-screen">
-		{@render children()}
-	</div>
-</section>
+{@render children()}

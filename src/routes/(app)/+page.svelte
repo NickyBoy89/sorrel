@@ -6,6 +6,7 @@
     import { onMount } from "svelte";
 
     let username = $state("User...")
+    let menus = $state([])
 
     onMount(() => {
         fetch(`${backendRootURL}/api/user?${new URLSearchParams({
@@ -13,6 +14,10 @@
         })}`)
             .then((resp) => resp.json())
             .then((user) => username = user.display_name)
+            .catch((error) => console.error(error));
+        fetch(`${backendRootURL}/api/menu/list`)
+            .then((resp) => resp.json())
+            .then((respJson) => menus = respJson)
             .catch((error) => console.error(error));
     })
 
@@ -24,16 +29,11 @@
 </Navbar>
 
 <h1 class="text-4xl text-center my-4 text-black dark:text-white">Shared With You</h1>
-<div class="flex flex-col my-4">
-    {#await fetch(`${backendRootURL}/api/menu/list`).then((resp) => resp.json())}
-        Loading...
-    {:then menus}
+<div class="flex flex-col my-4 px-4">
     {#each menus as menu}
         <MenuEditor menuName={menu.name} menuDate={toJsDate(menu.date)} menuId={menu.id} canEdit={false}/>
     {/each}
-    {:catch error}
-        There was an error fetching the menus: {error}
-    {/await}
 </div>
+
 
 <!-- <h1 class="text-4xl text-center my-4">Shopping Lists</h1> -->

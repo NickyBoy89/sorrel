@@ -1,8 +1,8 @@
 <script lang="ts">
-  let { mainItem = () => {}, children } = $props()
+  let { mainItem = () => {}, children = null } = $props()
 </script>
 
-<nav class="flex flex-row py-2">
+<nav class="flex flex-row py-2 px-2">
   <div class="flex-grow">
     {@render mainItem()}
   </div>
