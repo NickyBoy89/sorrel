@@ -9,19 +9,17 @@
     let menus = $state([])
 
     onMount(() => {
-        fetch(`${backendRootURL}/api/user?${new URLSearchParams({
+        fetch(`/api/user?${new URLSearchParams({
             userId: `${localStorage.getItem("userId")}`,
         })}`)
             .then((resp) => resp.json())
             .then((user) => username = user.display_name)
             .catch((error) => console.error(error));
-        fetch(`${backendRootURL}/api/menu/list`)
+        fetch("/api/menu/list")
             .then((resp) => resp.json())
             .then((respJson) => menus = respJson)
             .catch((error) => console.error(error));
     })
-
-    import { backendRootURL } from "../../constants.js";
 </script>
 
 <Navbar>

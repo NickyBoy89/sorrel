@@ -1,10 +1,8 @@
 <script lang="ts">
-    import { backendRootURL } from "../../../../constants";
-
 </script>
 
 <div class="text-black dark:text-white">
-    {#await fetch(`${backendRootURL}/api/users`).then((resp) => resp.json())}
+    {#await fetch("/api/users").then((resp) => resp.json())}
     Loading...
     {:then users}
     <ol>

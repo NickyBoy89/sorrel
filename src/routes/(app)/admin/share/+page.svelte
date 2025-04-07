@@ -1,7 +1,6 @@
 <script lang="ts">
     import UiButton from "$lib/components/uiButton.svelte";
     import { onMount } from "svelte";
-    import { backendRootURL } from "../../../../constants";
     import Fa from 'svelte-fa'
     import { faSpinner, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
 
@@ -16,7 +15,7 @@
     let selected = [];
 
     onMount(() => {
-        fetch(`${backendRootURL}/api/users`)
+        fetch("/api/users")
             .then((resp) => resp.json())
             .then((resp) => users = resp)
             .catch((error) => console.error(error));

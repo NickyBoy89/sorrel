@@ -2,7 +2,7 @@
     import MenuRenderer from "$lib/components/menuRenderer.svelte";
     import { page } from "$app/state";
     import { onMount } from "svelte";
-    import { backendRootURL, menuDefaultSections } from "../../../constants.js";
+    import { menuDefaultSections } from "../../../constants.js";
     import Navbar from "$lib/components/navbar.svelte";
     import ShadowedButtonLink from "$lib/components/shadowedButtonLink.svelte";
     import { toJsDate } from "$lib/tools.js";
@@ -44,7 +44,7 @@
     })
 
     const fetchMenu = async () => {
-        await fetch(`${backendRootURL}/api/menu/${menuId}`)
+        await fetch(`/api/menu/${menuId}`)
         .then(resp => resp.json())
         .then((respJson) => {
             menu.name = respJson.name;
@@ -56,7 +56,7 @@
     }
 
     const fetchMenuItems = async () => {
-        await fetch(`${backendRootURL}/api/menu/${menuId}/items`)
+        await fetch(`/api/menu/${menuId}/items`)
             .then((resp) => resp.json())
             .then(respJson => visibleItems = respJson)
             .catch((error) => {

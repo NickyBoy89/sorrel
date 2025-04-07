@@ -2,13 +2,12 @@
   import MenuEditor from "$lib/components/menuEditor.svelte";
   import UiButton from "$lib/components/uiButton.svelte";
   import { onMount } from "svelte";
-  import { backendRootURL } from "../../../constants";
   import { toJsDate } from "$lib/tools";
 
   let menus: Array<any> = $state([] as Array<MenuItemType>);
 
   const fetchMenus = async () => {
-    await fetch(`${backendRootURL}/api/menu/list`)
+    await fetch("/api/menu/list")
       .then((resp) => resp.json())
       .then((respJson) => menus = respJson)
       .catch((error) => {
@@ -24,7 +23,7 @@
   const createMenu = async () => {
     const now = new Date();
 
-    await fetch(`${backendRootURL}/api/menu/create`, {
+    await fetch("/api/menu/create", {
         method: "POST",
         body: new URLSearchParams({
           name: "New Menu",
