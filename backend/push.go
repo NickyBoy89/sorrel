@@ -180,10 +180,11 @@ func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) (bool, error) {
 
 	log.Debug("Started sending notifications to user", "userId", userId)
 
-	subs, err := tx.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE id = ?", userId)
+	subs, err := tx.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE user_id = ?", userId)
 	if err != nil {
 		return success, err
 	}
+	defer subs.Close()
 
 	for subs.Next() {
 		log.Info("Reading sub")

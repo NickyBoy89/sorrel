@@ -19,9 +19,13 @@
     };
 
     const handlePushMenu = async () => {
-      await fetch(`/api/menu/share?${new URLSearchParams({
-        menuId: menuId,
-      })}`, { method: "POST" })
+      await fetch("/api/menu/share", { 
+        method: "POST",
+        body: JSON.stringify({
+          menuId: menuId,
+          users: [-1],
+        })
+       })
       .catch((error) => {
         console.error(error);
       })
