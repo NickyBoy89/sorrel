@@ -20,6 +20,7 @@ import (
 var (
 	serverPort = 9031
 	debug      = false
+	authMethod string
 )
 
 type Config struct {
@@ -45,6 +46,7 @@ var db *sql.DB
 func init() {
 	serveCommand.Flags().IntVar(&serverPort, "port", 9031, "The port to listen on")
 	serveCommand.Flags().BoolVar(&debug, "debug", false, "Enable debug logging")
+	serveCommand.Flags().StringVar(&authMethod, "auth-method", "tailscale", "The auth method used to access the database")
 }
 
 var serveCommand = &cobra.Command{
@@ -76,6 +78,11 @@ var serveCommand = &cobra.Command{
 			return
 		}
 
+		// Initialize auth
+
+		SetAuthMethod(authMethod)
+
+		// Serve frontend
 		http.Handle("/", http.FileServer(http.Dir("build/")))
 
 		// Application
