@@ -87,19 +87,19 @@ var serveCommand = &cobra.Command{
 
 		// Application
 		http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
-		http.HandleFunc("/api/menu/{menuId}/edit", handleEditMenu)
+		http.Handle("/api/menu/{menuId}/edit", authHandlerFunc(handleEditMenu))
 		http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
-		http.HandleFunc("/api/menu/{menuId}/create-item", handleCreateMenuItem)
+		http.Handle("/api/menu/{menuId}/create-item", authHandlerFunc(handleCreateMenuItem))
 		http.HandleFunc("/api/menu/list", handleListMenus)
-		http.HandleFunc("/api/menu/create", handleCreateMenu)
-		http.HandleFunc("/api/menu/share", handleShareMenu)
-		http.HandleFunc("/api/items/{itemId}/edit", handleEditMenuItem)
-		http.HandleFunc("/api/items/{itemId}/delete", handleDeleteMenuItem)
+		http.Handle("/api/menu/create", authHandlerFunc(handleCreateMenu))
+		http.Handle("/api/menu/share", authHandlerFunc(handleShareMenu))
+		http.Handle("/api/items/{itemId}/edit", authHandlerFunc(handleEditMenuItem))
+		http.Handle("/api/items/{itemId}/delete", authHandlerFunc(handleDeleteMenuItem))
 
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)
-		http.HandleFunc("/api/users", handleListUsers)
-		http.HandleFunc("/api/user", handleGetUser)
+		http.Handle("/api/users", authHandlerFunc(handleListUsers))
+		http.Handle("/api/user", authHandlerFunc(handleGetUser))
 
 		// Push
 		http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)
