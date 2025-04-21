@@ -5,7 +5,7 @@
     import { goto } from '$app/navigation';
 
     let statusMessage = $state("");
-    let statusBorder = $state("#665c54");
+    let statusBorder = $state("var(--color-zinc-700)");
 
     let inviteCode: number;
 
@@ -49,8 +49,8 @@
 <div class="flex items-center h-full welcome-dialog">
     <div>
         <h1 class="welcome-text text-center text-4xl">Welcome!</h1>
-        <h2 class="text-center my-2">Thank you for trying out the grandparent meal planner!</h2>
-        <div class="access-code-input rounded-md text-center">
+        <h2 class="text-center my-2">Thank you for trying out Sorrel!</h2>
+        <div class="bg-white dark:bg-zinc-800 border border-zinc-700 access-code-input rounded-md text-center">
             {#if !notificationsPanelOpen}
             <h2 class="py-8 text-lg">Please enter your invite code below</h2>
             <form class="px-8 flex flex-row gap-x-3" onsubmit={handleSubmitCode}>
@@ -61,7 +61,6 @@
             {:else}
             <div class="flex flex-col gap-y-8 py-8 px-4">
                 <h2 class="text-xl">In order to deliver your menus, we need your permission to send you a notification when that happens.</h2>
-                <h2 class="text-md">No rush, click the bell below to enable notifications</h2>
                 <button onclick={subscribeUser} class="flex justify-center object-none text-7xl cursor-pointer rounded-md px-4 py-3"><Fa icon={faBell} id="bell-icon" /></button>
             </div>
             {/if}
@@ -71,10 +70,21 @@
 
 <style>
     .access-code-input {
-        background-color: #665c54;
         margin-top: 1rem;
         margin-bottom: 4rem;
     }
+
+    input {
+        border: 1px solid var(--color-zinc-700);
+        height: 2rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        input {
+            border: 1px solid var(--color-zinc-700);
+            height: 2rem;
+        }
+	}
 
     @keyframes wiggle {
         0% { transform: rotate(0deg); }
@@ -92,7 +102,6 @@
     }
 
     #invite-code {
-      background-color: #3c3836;
       height: 2rem;
       min-width: 0;
       width: 100%;
