@@ -11,6 +11,7 @@
 		userId = localStorage.getItem("userId");
 		if (userId === null) {
 			goto("/login");
+			return;
 		}
 
 		(async () => {
