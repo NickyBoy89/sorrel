@@ -32,11 +32,18 @@ func tailscaleAuthHandler(handler func(w http.ResponseWriter, r *http.Request)) 
 	}))
 }
 
+func identityAuthHandler(handler func(w http.ResponseWriter, r *http.Request)) http.Handler {
+	return http.HandlerFunc(handler)
+}
+
 func SetAuthMethod(authMethodName string) {
 
 	switch authMethodName {
 	case "tailscale":
 		authHandlerFunc = tailscaleAuthHandler
 		log.Info("Tailscale authentification enabled")
+	case "none":
+		authHandlerFunc = identityAuthHandler
+		log.Warn("Authentification disabled! Please enable this before exposing this service to the internet")
 	}
 }
