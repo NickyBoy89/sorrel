@@ -24,8 +24,10 @@ var (
 )
 
 type Config struct {
-	PublicKey  string `json:"public_key"`
-	PrivateKey string `json:"private_key"`
+	PublicKey        string `json:"public_key"`
+	PrivateKey       string `json:"private_key"`
+	KeycloakHostname string `json:"keycloak_hostname,omitempty"`
+	KeycloakRealmId  string `json:"keycloak_realm_id,omitempty"`
 }
 
 type Menu struct {
@@ -46,7 +48,7 @@ var db *sql.DB
 func init() {
 	serveCommand.Flags().IntVar(&serverPort, "port", 9031, "The port to listen on")
 	serveCommand.Flags().BoolVar(&debug, "debug", false, "Enable debug logging")
-	serveCommand.Flags().StringVar(&authMethod, "auth-method", "tailscale", "The auth method used to access the database")
+	serveCommand.Flags().StringVar(&authMethod, "auth-method", "keycloak", "The auth method used to access the database")
 }
 
 var serveCommand = &cobra.Command{
@@ -116,6 +118,7 @@ var serveCommand = &cobra.Command{
 func readConfigFile(fileName string) error {
 	configFile, err := os.OpenFile(fileName, os.O_RDONLY, 0644)
 	if err != nil {
+		// Write default config file if one doesn't exist
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Info("config file does not exist, creating it now")
 			configFile, err = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0644)
@@ -147,6 +150,8 @@ func readConfigFile(fileName string) error {
 	}
 	defer configFile.Close()
 
+	// Load values from config
+
 	var conf Config
 	if err := json.NewDecoder(configFile).Decode(&conf); err != nil {
 		return err
@@ -154,6 +159,8 @@ func readConfigFile(fileName string) error {
 
 	priv = conf.PrivateKey
 	pub = conf.PublicKey
+	keycloakHostname = conf.KeycloakHostname
+	keycloakRealmId = conf.KeycloakRealmId
 
 	return nil
 }

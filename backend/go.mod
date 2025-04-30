@@ -6,6 +6,8 @@ toolchain go1.24.2
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/gorilla/handlers v1.5.2
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/spf13/cobra v1.9.1
 	tailscale.com v1.82.4
@@ -19,9 +21,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.8.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250223041408-d3c622f1b874 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/gorilla/handlers v1.5.2 // indirect
 	github.com/hdevalence/ed25519consensus v0.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jsimonetti/rtnetlink v1.4.2 // indirect
