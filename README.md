@@ -12,7 +12,8 @@ Features include:
 * [x] Ability to send a push notification when a menu has been created
 * [ ] Probably a lot more...
 
-> [!WARN] Please note that this project is built for my own use, and therefore may contain implicit steps for it to work. I have tried to document as many of these as I can, but these will most likely be incomplete. If you find one of these, please open a PR, or if you find something that you think should be a default, feel free to contribute!
+> [!WARNING]
+> Please note that this project is built for my own use, and therefore may contain implicit steps for it to work. I have tried to document as many of these as I can, but these will most likely be incomplete. If you find one of these, please open a PR, or if you find something that you think should be a default, feel free to contribute!
 
 ## Requirements
 
