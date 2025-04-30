@@ -28,6 +28,7 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
+		"keycloak-js": "^26.1.5",
 		"luxon": "^3.5.0"
 	}
 }
