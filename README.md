@@ -55,7 +55,7 @@ By default, `sorrel` places its config file [`sorrel-config.json`](https://githu
 
 ### Configuration Values in `sorrel-config.json`
 
-* `public_key` is the VAPID public key used for push notifications
-* `private_key` is the corresponding VAPID private key for push notifications
+* `public_key` is the VAPID public key used for push notifications. This and `private_key` are automatically filled when a default config is created (when the app cannot find a pre-existing config file).
+* `private_key` is the corresponding VAPID private key for push notifications. Automatically filled by the default config.
 * `keycloak_hostname` (if using the default keycloak auth handler) is the url of the keycloak instance (ex: https://keycloak.my-domain.com)
 * `keycloak_realm_name` (if using the default keycloak auth handler) is the keycloak realm name that the application has been configured to use
