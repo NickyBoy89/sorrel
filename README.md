@@ -13,7 +13,7 @@ Features include:
 * [ ] Probably a lot more...
 
 > [!WARNING]
-> Please note that this project is built for my own use, and therefore may contain implicit steps for it to work. I have tried to document as many of these as I can, but these will most likely be incomplete. If you find one of these, please open a PR, or if you find something that you think should be a default, feel free to contribute!
+> Please note that this project is built for my own use, and therefore may contain implicit steps for it to work. I have tried to document as many of these as I can, but these will most likely be incomplete. If you find a missing dependency, feel free to open an issue/PR, and/or if you find something that would be generally useful for the functionality of the app, please contribute!
 
 ## Requirements
 
@@ -51,7 +51,7 @@ src/
 By default, `sorrel` places its config file [`sorrel-config.json`](https://github.com/NickyBoy89/sorrel/blob/master/backend/main.go#L7) alongside the binary. If no config file is found, a new one is created.
 
 > [!TIP]
-> When running the CLI (`./backend`) the built-in help text (ex: `./backend --help` or `./backend serve --help) can give information about more options available to the user
+> When running the CLI (`./backend`) the built-in help text (ex: `./backend --help` or `./backend serve --help`) can give information about more options available to the user
 
 ### Configuration Values in `sorrel-config.json`
 
