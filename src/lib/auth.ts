@@ -9,7 +9,7 @@ let instance = {
 };
 
 const initOptions: KeycloakInitOptions = {
-    onLoad: "check-sso",
+    onLoad: "login-required",
 };
 
 const keycloak = new Keycloak(instance);
