@@ -6,7 +6,7 @@ func initDb(db *sql.DB) error {
 	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS menus(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-		date TIMESTAMP
+		date TIMESTAMP NOT NULL
 	);
 	`); err != nil {
 		return err
