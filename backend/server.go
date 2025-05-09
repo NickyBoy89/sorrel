@@ -101,7 +101,7 @@ var serveCommand = &cobra.Command{
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)
 		http.Handle("/api/users", authHandlerFunc(handleListUsers))
-		http.Handle("/api/user", authHandlerFunc(handleGetUser))
+		http.HandleFunc("/api/user", handleGetUser)
 
 		// Push
 		http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)

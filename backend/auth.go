@@ -39,6 +39,7 @@ func tailscaleAuthHandler(handler func(w http.ResponseWriter, r *http.Request)) 
 	}))
 }
 
+// `identityAuthHandler` handles the auth requests by passing them right through, with no operation done
 func identityAuthHandler(handler func(w http.ResponseWriter, r *http.Request)) http.Handler {
 	return http.HandlerFunc(handler)
 }
@@ -117,7 +118,20 @@ func validateToken(tokenString string) (*jwt.Token, error) {
 
 func keycloakAuthHandler(handler func(w http.ResponseWriter, r *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		bearer := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer: ")
+		if r.Method == http.MethodOptions {
+			w.Header().Add("Access-Control-Allow-Origin", "*")
+			w.Header().Add("Access-Control-Allow-Headers", "Authorization")
+			return
+		}
+
+		bearerToken, contains := r.Header["Authorization"]
+		// The user did not provide an auth token
+		if !contains {
+			http.Error(w, "error: User did not provide the token in the \"Authorization\" header", http.StatusBadRequest)
+			return
+		}
+
+		bearer := strings.TrimPrefix(bearerToken[0], "Bearer: ")
 
 		log.Debug("Incoming auth request", "token", bearer)
 
