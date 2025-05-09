@@ -5,11 +5,12 @@
   import { toJsDate } from "$lib/tools";
   import { bearerToken } from "../stores";
   import { get } from "svelte/store";
+  import { APIUrl } from "../../../constants";
 
   let menus: Array<any> = $state([] as Array<MenuItemType>);
 
   const fetchMenus = async () => {
-    await fetch("/api/menu/list")
+    await fetch(`${APIUrl}/api/menu/list`)
       .then((resp) => resp.json())
       .then((respJson) => menus = respJson)
       .catch((error) => {
@@ -25,7 +26,7 @@
   const createMenu = async () => {
     const now = new Date();
 
-    await fetch("/api/menu/create", {
+    await fetch(`${APIUrl}/api/menu/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer: ${get(bearerToken)}`

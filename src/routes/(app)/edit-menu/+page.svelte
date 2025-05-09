@@ -3,7 +3,7 @@
     import MenuItemEditor from "$lib/components/menuItemEditor.svelte";
     import UiButton from "$lib/components/uiButton.svelte";
     import Navbar from "$lib/components/navbar.svelte";
-    import { menuDefaultSections } from "../../../constants.js";
+    import { APIUrl, menuDefaultSections } from "../../../constants.js";
 
     import { page } from "$app/state";
     import { onMount } from "svelte";
@@ -24,7 +24,7 @@
     })
 
     const fetchMenu = async () => {
-        menu = await fetch(`/api/menu/${menuId}`)
+        menu = await fetch(`${APIUrl}/api/menu/${menuId}`)
         .then(resp => resp.json())
         .catch((error) => {
             console.log(error);
@@ -32,7 +32,7 @@
     }
 
     const fetchMenuItems = async () => {
-        await fetch(`/api/menu/${menuId}/items`)
+        await fetch(`${APIUrl}/api/menu/${menuId}/items`)
             .then((resp) => resp.json())
             .then(respJson => visibleItems = respJson)
             .catch((error) => {
@@ -59,7 +59,7 @@
     }
 
     const createMenuItem = async () => {
-        await fetch(`/api/menu/${menuId}/create-item`, {
+        await fetch(`${APIUrl}/api/menu/${menuId}/create-item`, {
             method: "POST",
             body: new URLSearchParams({name: "", description: ""}),
         }).catch((error) => {

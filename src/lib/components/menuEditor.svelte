@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { APIUrl } from "../../constants";
     import UiButton from "./uiButton.svelte";
     import { DateTime } from "luxon";
 
@@ -10,7 +11,7 @@
     let editorOpen = $state(false);
 
     const handleMenuChange = async () => {
-      await fetch(`/api/menu/${menuId}/edit?${new URLSearchParams({
+      await fetch(`${APIUrl}/api/menu/${menuId}/edit?${new URLSearchParams({
           name: name,
           date: date.toISOString().split("T")[0]
         })}`, { method: "POST" }).catch((error) => {
@@ -19,7 +20,7 @@
     };
 
     const handlePushMenu = async () => {
-      await fetch("/api/menu/share", { 
+      await fetch(`${APIUrl}/api/menu/share`, { 
         method: "POST",
         body: JSON.stringify({
           menuId: menuId,

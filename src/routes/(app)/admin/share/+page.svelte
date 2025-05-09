@@ -3,6 +3,7 @@
     import { onMount } from "svelte";
     import Fa from 'svelte-fa'
     import { faSpinner, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
+    import { APIUrl } from "../../../../constants";
 
     type User = {
         id: number,
@@ -15,7 +16,7 @@
     let selected = [];
 
     onMount(() => {
-        fetch("/api/users")
+        fetch(`${APIUrl}/api/users`)
             .then((resp) => resp.json())
             .then((resp) => users = resp)
             .catch((error) => console.error(error));

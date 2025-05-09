@@ -4,18 +4,19 @@
     import UserStatus from "$lib/components/userStatus.svelte";
     import { toJsDate } from "$lib/tools.js";
     import { onMount } from "svelte";
+    import { APIUrl } from "../../constants";
 
     let username = $state("User...")
-    let menus = $state([])
+    let menus: Array<Menu> = $state([])
 
     onMount(() => {
-        fetch(`/api/user?${new URLSearchParams({
+        fetch(`${APIUrl}/api/user?${new URLSearchParams({
             userId: `${localStorage.getItem("userId")}`,
         })}`)
             .then((resp) => resp.json())
             .then((user) => username = user.display_name)
             .catch((error) => console.error(error));
-        fetch("/api/menu/list")
+        fetch(`${APIUrl}/api/menu/list`)
             .then((resp) => resp.json())
             .then((respJson) => menus = respJson)
             .catch((error) => console.error(error));

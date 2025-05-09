@@ -1,3 +1,5 @@
+import { APIUrl } from "../constants";
+
 // This function is needed because Chrome doesn't accept a base64 encoded string
 // as value for applicationServerKey in pushManager.subscribe yet
 // https://bugs.chromium.org/p/chromium/issues/detail?id=802280
@@ -27,7 +29,7 @@ export const isSubscriptionValid = async (): Promise<boolean> => {
         return false;
     }
 
-    await fetch("/api/push/validate", {
+    await fetch(`${APIUrl}/api/push/validate`, {
         method: "POST",
         body: JSON.stringify(subJson),
     }).then((resp) => {
@@ -47,7 +49,7 @@ export const isSubscriptionValid = async (): Promise<boolean> => {
 }
 
 export const handleSubscribe = async (inviteCode: number) => {
-    const vapidKey = await fetch("/api/push/public-key").then((resp) => resp.text());
+    const vapidKey = await fetch(`${APIUrl}/api/push/public-key`).then((resp) => resp.text());
 
     const registration = await navigator.serviceWorker.ready;
 
@@ -67,7 +69,7 @@ export const handleSubscribe = async (inviteCode: number) => {
 
     console.log("Subscribed user...");
 
-    await fetch("/api/push/subscribe", {
+    await fetch(`${APIUrl}/api/push/subscribe`, {
         method: "POST",
         body: JSON.stringify({
             userId: inviteCode,

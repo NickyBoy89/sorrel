@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { APIUrl } from "../../constants";
     import UiButton from "./uiButton.svelte";
 
     let { itemId, name: itemName = "", description: itemDesc = "", section: itemSection = "mains", onchange = () => {}} = $props();
@@ -8,7 +9,7 @@
     let section = $state(itemSection);
 
     const updateValues = async () => {
-        await fetch(`/api/items/${itemId}/edit?${new URLSearchParams({
+        await fetch(`${APIUrls}/api/items/${itemId}/edit?${new URLSearchParams({
                 name: name,
                 description: description,
                 section: section
@@ -23,7 +24,7 @@
     };
 
     const deleteMenuItem = async () => {
-        await fetch(`/api/items/${itemId}/delete`, { method: "POST" }).catch((error) => console.log(error));
+        await fetch(`${APIUrl}/api/items/${itemId}/delete`, { method: "POST" }).catch((error) => console.log(error));
         onchange();
     }
 </script>
