@@ -10,24 +10,26 @@
 
 	let userId;
 
+	let instance = {
+		url: keycloakUrl,
+		realm: keycloakRealm,
+		clientId: keycloakClientId
+	};
+	const initOptions: KeycloakInitOptions = {
+		onLoad: "check-sso",
+	};
+
+	let keycloakLoaded = $state(false);
+
 	onMount(() => {
-        let instance = {
-            url: keycloakUrl,
-            realm: keycloakRealm,
-            clientId: keycloakClientId
-        };
-
-        const keycloak = new Keycloak(instance);
-        const initOptions: KeycloakInitOptions = {
-            onLoad: "login-required",
-        };
-
+		const keycloak = new Keycloak(instance);
 		keycloak.init(initOptions)
 			.then((auth) => {
 				if (auth) {
 					console.log("Auth successful!");
 				}
 				bearerToken.set(keycloak.token);		
+				keycloakLoaded = true;
 			})
 			.catch((error) => { 
 				console.error("Auth not successful")

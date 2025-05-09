@@ -4,6 +4,7 @@
     import Fa from 'svelte-fa'
     import { faSpinner, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
     import { APIUrl } from "../../../../constants";
+    import { bearerToken } from "../../stores";
 
     type User = {
         id: number,
@@ -15,12 +16,20 @@
     let icons = $state([] as Array<null | IconDefinition>);
     let selected = [];
 
-    onMount(() => {
-        fetch(`${APIUrl}/api/users`)
+    bearerToken.subscribe(token => {
+        if (token == undefined) return;
+        
+        fetch(`${APIUrl}/api/users`, {
+            headers: {
+                Authorization: `Bearer: ${token}`
+            },
+        })
             .then((resp) => resp.json())
             .then((resp) => users = resp)
             .catch((error) => console.error(error));
+    });
 
+    onMount(() => {
         selected = Array(users.length).fill(false);
         icons = Array(users.length).fill(null);
     });

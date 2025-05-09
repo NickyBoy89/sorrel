@@ -1,5 +1,7 @@
 <script lang="ts">
     import { APIUrl } from "../../constants";
+    import InteractiveBox from "./ui/interactiveBox.svelte";
+    import TextArea from "./ui/textArea.svelte";
     import UiButton from "./uiButton.svelte";
 
     let { itemId, name: itemName = "", description: itemDesc = "", section: itemSection = "mains", onchange = () => {}} = $props();
@@ -9,7 +11,7 @@
     let section = $state(itemSection);
 
     const updateValues = async () => {
-        await fetch(`${APIUrls}/api/items/${itemId}/edit?${new URLSearchParams({
+        await fetch(`${APIUrl}/api/items/${itemId}/edit?${new URLSearchParams({
                 name: name,
                 description: description,
                 section: section
@@ -29,32 +31,30 @@
     }
 </script>
 
-<div class="rounded-md p-4 bg-white dark:bg-zinc-800 border border-zinc-700">
-    <form action="" class="flex flex-col">
-        <div class="flex flex-row justify-between items-center">
-            <select name="edit-item-section" id="edit-item-section" class="rounded-sm text-neutral-900 dark:text-white pl-2" value={section} onchange={(event) => {section = event?.target?.value; updateValues();}}>
-                <option value="mains">Mains</option>
-                <option value="desserts">Desserts</option>
-                <option value="appetizers">Appetizers</option>
-            </select>
-            <div class="">
-                <UiButton text="Delete" action={deleteMenuItem} />
-            </div>
+<InteractiveBox>
+    <div class="flex flex-row justify-between items-center">
+        <select name="edit-item-section" id="edit-item-section" class="rounded-sm text-neutral-900 dark:text-white pl-2" value={section} onchange={(event) => {section = event?.target?.value; updateValues();}}>
+            <option value="mains">Mains</option>
+            <option value="desserts">Desserts</option>
+            <option value="appetizers">Appetizers</option>
+        </select>
+        <div class="">
+            <UiButton text="Delete" action={deleteMenuItem} />
         </div>
-        <input type="text" id="edit-item-name" name="edit-item-name" class="rounded-sm w-auto text-neutral-900 dark:text-white mt-2 pl-2" placeholder="Name of dish..." value={itemName} onchange={(event) => {name = event?.target?.value; updateValues();}}>
-        <input type="text" id="edit-item-desc" class="rounded-sm text-neutral-900 dark:text-white mt-2 pl-2" placeholder="Description (Optional)" value="{itemDesc}" onchange={(event) => {description = event?.target?.value; updateValues();}}>
-    </form>
-</div>
+    </div>
+    <TextArea placeholder="Name of dish..." initialValue={itemName} onchange={(event) => {name = event?.target?.value; updateValues();}} />
+    <TextArea placeholder="Description (Optional)" initialValue={itemDesc} onchange={(event) => {description = event?.target?.value; updateValues();}} />
+</InteractiveBox>
 
 <style>
-    input,select {
+    select {
         background-color: var(--color-white);
         border: 1px solid var(--color-zinc-700);
         height: 2rem;
     }
 
     @media (prefers-color-scheme: dark) {
-        input,select {
+        select {
             background-color: var(--color-zinc-900);
             border: 1px solid var(--color-zinc-700);
             height: 2rem;
