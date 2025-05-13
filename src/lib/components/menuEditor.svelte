@@ -1,7 +1,9 @@
 <script lang="ts">
+    import { get } from "svelte/store";
     import { APIUrl } from "../../constants";
     import UiButton from "./uiButton.svelte";
     import { DateTime } from "luxon";
+    import { bearerToken } from "../../routes/(app)/stores";
 
     let { menuName, menuDate, menuId, canEdit = false, relativeDate = true } = $props();
 
@@ -14,7 +16,12 @@
       await fetch(`${APIUrl}/api/menu/${menuId}/edit?${new URLSearchParams({
           name: name,
           date: date.toISOString().split("T")[0]
-        })}`, { method: "POST" }).catch((error) => {
+        })}`, { 
+          method: "POST",
+          headers: {
+            Authorization: `Bearer: ${get(bearerToken)}`,
+          },
+        }).catch((error) => {
         console.log(error);
       });
     };
@@ -22,6 +29,9 @@
     const handlePushMenu = async () => {
       await fetch(`${APIUrl}/api/menu/share`, { 
         method: "POST",
+        headers: {
+          Authorization: `Bearer: ${get(bearerToken)}`,
+        },
         body: JSON.stringify({
           menuId: menuId,
           users: [-1],
