@@ -5,12 +5,13 @@
 
 html {
   color: black;
-  background-color: var(--color-neutral-900);
+  background-color: var(--color-white);
   font-family: "Nunito", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   html {
     color: white;
+    background-color: var(--color-neutral-900);
   }
 }
