@@ -98,6 +98,10 @@ var serveCommand = &cobra.Command{
 		http.Handle("/api/items/{itemId}/edit", authHandlerFunc(handleEditMenuItem))
 		http.Handle("/api/items/{itemId}/delete", authHandlerFunc(handleDeleteMenuItem))
 
+		// Grocery lists
+		http.HandleFunc("/api/v1/grocery_list/{groceryListId}", handleGroceryListAction)
+		http.HandleFunc("/api/v1/grocery_list", handleCreateGroceryList)
+
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)
 		http.Handle("/api/users", authHandlerFunc(handleListUsers))
