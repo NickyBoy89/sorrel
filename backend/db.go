@@ -55,14 +55,27 @@ func initDb(db *sql.DB) error {
 		return err
 	}
 
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS shopping_lists(
+	// Grocery lists
+
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS grocery_lists(
 		id INTEGER PRIMARY KEY AUTOINCREMENT
 	);
 	`); err != nil {
 		return err
 	}
 
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS shared_lists(
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS grocery_list_contents(
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		grocery_list_id INTEGER NOT NULL,
+		grocery_item_id INTEGER NOT NULL,
+		FOREIGN KEY(grocery_list_id) REFERENCES grocery_lists(id),
+		FOREIGN KEY(grocery_item_id) REFERENCES grocery_item(id)
+	);
+	`); err != nil {
+		return err
+	}
+
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS shared_grocery_lists(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		shopping_list_id INTEGER NOT NULL,
 		user_id INTEGER NOT NULL,
@@ -73,12 +86,12 @@ func initDb(db *sql.DB) error {
 		return err
 	}
 
-	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS grocery_item(
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS grocery_items(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		category TEXT,
 		quantity TEXT NOT NULL,
-		checked BOOL NOT NULL
+		checked BOOL NOT NULL DEFAULT FALSE
 	);
 	`); err != nil {
 		return err
