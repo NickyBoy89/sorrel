@@ -4,6 +4,8 @@
     import UiButton from "./uiButton.svelte";
     import { DateTime } from "luxon";
     import { bearerToken } from "../../routes/(app)/stores";
+    import TextArea from "./ui/textArea.svelte";
+    import InteractiveBox from "./ui/interactiveBox.svelte";
 
     let { menuName, menuDate, menuId, canEdit = false, relativeDate = true } = $props();
 
@@ -59,7 +61,7 @@
     }
 </script>
 
-<div class="rounded-md p-4 my-2 w-full bg-neutral-100 dark:bg-zinc-800 border-1 border-zinc-700 shadow-sm">
+<InteractiveBox>
   <div class="flex flex-row justify-between">
     <a href="/{canEdit ? "edit-menu" : "menu"}?menu-id={menuId}" class="menu-title flex flex-col sm:flex-row grow items-center">
       <div class="menu-name text-center lg:text-left text-2xl text-black dark:text-white">
@@ -76,9 +78,9 @@
   <div class="menu-editor {editorOpen ? "" : "hidden"} flex-col">
     <div>
       <label for="edit-menu-name">Name:</label>
-      <input type="text" id="edit-menu-name" name="name" class="block" bind:value={name} onchange={handleMenuChange}>
+      <TextArea onchange={handleMenuChange} bind:initialValue={name} />
       <label for="edit-menu-date">Date:</label>
-      <input type="date" id="edit-menu-date" name="date" class="block date-editor" value={date.toISOString().split("T")[0]} onchange={(event: Event) => {
+      <input type="date" id="edit-menu-date" name="date" class="block date-editor border-1 border-neutral-700 rounded-md" value={date.toISOString().split("T")[0]} onchange={(event: Event) => {
         const dateStr = (event?.target as HTMLInputElement).value;
         const [year, monthNumber, day] = dateStr.split("-");
         date = new Date(Number.parseInt(year), Number.parseInt(monthNumber) - 1, Number.parseInt(day));
@@ -90,11 +92,11 @@
     <UiButton text="Close" color="#458588" action={toggleEditor} />
     <UiButton text="Share" color="#d79921" action={handlePushMenu} />
   </div>
-</div>
+</InteractiveBox>
 
 <style>
   input {
-      background-color: var(--color-gray-400);
+      background-color: var(--color-white);
       height: 2rem;
   }
 

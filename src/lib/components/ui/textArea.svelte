@@ -1,8 +1,8 @@
 <script lang="ts">
-    let { placeholder = "", initialValue = "", onchange } = $props();
+    let { placeholder = "", initialValue = $bindable(""), onchange } = $props();
 </script>
 
-<input type="text" class="rounded-sm w-auto text-neutral-900 dark:text-white mt-2 pl-2" placeholder={placeholder} value={initialValue} onchange={onchange}>
+<input type="text" class="block rounded-sm w-auto text-neutral-900 dark:text-white mt-2 pl-2" placeholder={placeholder} bind:value={initialValue} onchange={onchange}>
 
 <style>
     input {

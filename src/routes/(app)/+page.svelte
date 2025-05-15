@@ -27,8 +27,8 @@
     <UserStatus userName={username} />
 </Navbar>
 
-<h1 class="text-4xl text-center my-4 text-black dark:text-white">Shared With You</h1>
-<div class="flex flex-col my-4 px-4">
+<h1 class="text-4xl text-center mb-8 text-black dark:text-white">Shared With You</h1>
+<div class="flex flex-col my-4 px-4 space-y-4">
     {#each menus as menu}
         <MenuSelector menuName={menu.name} menuDate={toJsDate(menu.date)} menuId={menu.id} canEdit={false}/>
     {/each}
