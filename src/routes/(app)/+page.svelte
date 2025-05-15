@@ -1,5 +1,5 @@
 <script lang="ts">;
-    import MenuEditor from "$lib/components/menuEditor.svelte";
+    import MenuSelector from "$lib/components/menuSelector.svelte";
     import Navbar from "$lib/components/navbar.svelte";
     import UserStatus from "$lib/components/userStatus.svelte";
     import { toJsDate } from "$lib/tools.js";
@@ -30,7 +30,7 @@
 <h1 class="text-4xl text-center my-4 text-black dark:text-white">Shared With You</h1>
 <div class="flex flex-col my-4 px-4">
     {#each menus as menu}
-        <MenuEditor menuName={menu.name} menuDate={toJsDate(menu.date)} menuId={menu.id} canEdit={false}/>
+        <MenuSelector menuName={menu.name} menuDate={toJsDate(menu.date)} menuId={menu.id} canEdit={false}/>
     {/each}
 </div>
 

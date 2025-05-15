@@ -1,5 +1,5 @@
 <script lang="ts">;
-  import MenuEditor from "$lib/components/menuEditor.svelte";
+  import MenuEditor from "$lib/components/menuSelector.svelte";
   import UiButton from "$lib/components/uiButton.svelte";
   import { onMount } from "svelte";
   import { toJsDate } from "$lib/tools";
