@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -89,8 +90,8 @@ func localURL(relativeUrl string) string {
 	return url
 }
 
-func localAPIRequest(t *testing.T, method string, relativeUrl string) *http.Response {
-	req, err := http.NewRequest(method, localURL(relativeUrl), nil)
+func localAPIRequest(t *testing.T, method string, relativeUrl string, body io.Reader) *http.Response {
+	req, err := http.NewRequest(method, localURL(relativeUrl), body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +110,7 @@ func TestCreateGroceryListV1(t *testing.T) {
 	s := startHTTPServer()
 	defer s.Shutdown(context.Background())
 
-	resp := localAPIRequest(t, http.MethodPost, "/api/v1/grocery_list")
+	resp := localAPIRequest(t, http.MethodPost, "/api/v1/grocery_list", nil)
 
 	if resp.StatusCode != 200 {
 		data, _ := io.ReadAll(resp.Body)
@@ -162,7 +163,7 @@ func TestGetGroceryListItemsV1(t *testing.T) {
 	s := startHTTPServer()
 	defer s.Shutdown(context.Background())
 
-	resp := localAPIRequest(t, http.MethodPost, "/api/v1/grocery_list")
+	resp := localAPIRequest(t, http.MethodPost, "/api/v1/grocery_list", nil)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatal(resp.StatusCode)
@@ -177,7 +178,7 @@ func TestGetGroceryListItemsV1(t *testing.T) {
 	addMapping(t, 1, b)
 	addMapping(t, 1, c)
 
-	resp = localAPIRequest(t, http.MethodGet, "/api/v1/grocery_list/1")
+	resp = localAPIRequest(t, http.MethodGet, "/api/v1/grocery_list/1", nil)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -191,5 +192,73 @@ func TestGetGroceryListItemsV1(t *testing.T) {
 
 	if len(groceryItems) != 3 {
 		t.Error("Expected 3 grocery items, got", len(groceryItems), "structure", groceryItems)
+	}
+}
+
+func TestEdidGroceryListV1(t *testing.T) {
+	setupGroceryTestingDB()
+	s := startHTTPServer()
+	defer s.Shutdown(context.Background())
+
+	resp := localAPIRequest(t, http.MethodPost, "/api/v1/grocery_list", nil)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatal("request returned code", "code", resp.StatusCode)
+	}
+
+	addGroceryItem(t, "Apple", "1")
+	addGroceryItem(t, "Banana", "2")
+	addGroceryItem(t, "Grapefruit", "3")
+
+	// Add items to lists
+	resp = localAPIRequest(t, http.MethodPatch, "/api/v1/grocery_list/1", bytes.NewBufferString("[1, 2]"))
+	if resp.StatusCode != http.StatusOK {
+		t.Fatal("error from server", "code", resp.StatusCode)
+	}
+
+	// Read them back
+	resp = localAPIRequest(t, http.MethodGet, "/api/v1/grocery_list/1", nil)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatal("error from server", "code", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	var groceryItems []GroceryItem
+	if err := json.NewDecoder(resp.Body).Decode(&groceryItems); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(groceryItems) != 2 {
+		log.Error("response should contain two items", "got", len(groceryItems))
+	}
+
+	tmp := GroceryItem{Id: 1, Name: "Apple", Quantity: "1"}
+	if groceryItems[0] != tmp {
+		t.Error("Expected to get", groceryItems[0], "instead got", tmp)
+	}
+
+	// Replace the list with a couple more
+	resp = localAPIRequest(t, http.MethodPatch, "/api/v1/grocery_list/1", bytes.NewBufferString("[1, 3]"))
+	if resp.StatusCode != http.StatusOK {
+		t.Fatal("error from server", "code", resp.StatusCode)
+	}
+
+	// Read them back
+	resp = localAPIRequest(t, http.MethodGet, "/api/v1/grocery_list/1", nil)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatal("error from server", "code", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	if err := json.NewDecoder(resp.Body).Decode(&groceryItems); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(groceryItems) != 2 {
+		log.Error("response should contain two items", "got", len(groceryItems))
+	}
+
+	tmp1 := GroceryItem{Id: 3, Name: "Grapefruit", Quantity: "3"}
+	if groceryItems[1] != tmp1 {
+		t.Error("Expected to get", groceryItems[0], "instead got", tmp)
 	}
 }
