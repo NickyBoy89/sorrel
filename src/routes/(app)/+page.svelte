@@ -5,7 +5,7 @@
     import { toJsDate } from "$lib/tools.js";
     import { onMount } from "svelte";
     import { APIUrl } from "../../constants";
-    import GroceryListRow from "$lib/components/grocery_list/groceryListRow.svelte";
+    import GroceryListRow from "$lib/components/groceryList/groceryListRow.svelte";
 
     let username = $state("User...");
     let menus: Array<Menu> = $state([]);
