@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event) => {
 	event.respondWith(respond());
 });
 
-self.addEventListener('push', function (event: any) {
+self.addEventListener('push', function (event: PushEvent) {
 	const payload = event.data?.text() ?? 'no payload';
 	const data = JSON.parse(payload);
 	const registration = self.registration as ServiceWorkerRegistration;
