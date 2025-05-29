@@ -6,6 +6,7 @@
     import { bearerToken } from "../../routes/(app)/stores";
     import TextArea from "./ui/textArea.svelte";
     import InteractiveBox from "./ui/interactiveBox.svelte";
+    import UiButtonLink from "./uiButtonLink.svelte";
 
     let { menuName, menuDate, menuId, canEdit = false, relativeDate = true } = $props();
 
@@ -90,7 +91,7 @@
       }}>
     </div>
     <UiButton text="Close" color="#458588" action={toggleEditor} />
-    <UiButton text="Share" color="#d79921" action={handlePushMenu} />
+    <UiButtonLink text="Share with" color="#d79921" href="/admin/share-menu/?menu-id={menuId}" />
   </div>
 </InteractiveBox>
 
