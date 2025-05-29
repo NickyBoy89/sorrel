@@ -29,22 +29,6 @@
       });
     };
 
-    const handlePushMenu = async () => {
-      await fetch(`${APIUrl}/api/menu/share`, { 
-        method: "POST",
-        headers: {
-          Authorization: `Bearer: ${get(bearerToken)}`,
-        },
-        body: JSON.stringify({
-          menuId: menuId,
-          users: [-1],
-        })
-       })
-      .catch((error) => {
-        console.error(error);
-      })
-    }
-
     const displayedDate = (): string => {
       if (!relativeDate) {
         return date.toISOString().split("T")[0];
