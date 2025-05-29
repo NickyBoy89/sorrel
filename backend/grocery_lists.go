@@ -17,6 +17,8 @@ type GroceryItem struct {
 
 // `handleGroceryListAction` handles the CRUD actions of a grocery list
 func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
 	rawGroceryId := r.PathValue("groceryListId")
 
 	groceryId, err := strconv.Atoi(rawGroceryId)
@@ -131,6 +133,8 @@ WHERE grocery_list_contents.grocery_list_id = ?`, groceryId)
 }
 
 func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
 	switch r.Method {
 	case http.MethodPost:
 		if _, err := db.Exec("INSERT INTO grocery_lists DEFAULT VALUES"); err != nil {
