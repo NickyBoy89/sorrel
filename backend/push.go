@@ -130,13 +130,6 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 		ActionUrl: fmt.Sprintf("/menu?menu-id=%d", req.MenuId),
 	}
 
-	encodedMessage, err := json.Marshal(msg)
-	if err != nil {
-		log.Error("error encoding message", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	// Begin a transaction because we're going to read and delete invalid
 	// subscriptions at the same time
 
@@ -152,7 +145,7 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[int]bool)
 
 	for _, userId := range req.UserIds {
-		if sent, err := SendNotificationToUser(tx, userId, encodedMessage); err != nil {
+		if sent, err := SendNotificationToUser(tx, userId, msg); err != nil {
 			log.Error("error sending notification", "error", err)
 			http.Error(w, "error sending notification", http.StatusInternalServerError)
 			return
@@ -174,11 +167,16 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) (bool, error) {
+func SendNotificationToUser(tx *sql.Tx, userId int, message PushMessage) (bool, error) {
 
 	var success bool
 
 	log.Debug("Started sending notifications to user", "userId", userId)
+
+	encodedMessage, err := json.Marshal(message)
+	if err != nil {
+		return success, err
+	}
 
 	subs, err := tx.Query("SELECT id, endpoint, keys_auth, keys_p256dh FROM notification_subscriptions WHERE user_id = ?", userId)
 	if err != nil {
@@ -199,7 +197,7 @@ func SendNotificationToUser(tx *sql.Tx, userId int, data []byte) (bool, error) {
 			return success, err
 		}
 
-		resp, err := webpush.SendNotification(data, &sub, &webpush.Options{
+		resp, err := webpush.SendNotification(encodedMessage, &sub, &webpush.Options{
 			Subscriber:      "example@example.com",
 			VAPIDPublicKey:  pub,
 			VAPIDPrivateKey: priv,
