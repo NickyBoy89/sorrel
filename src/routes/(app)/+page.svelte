@@ -10,7 +10,7 @@
     let username = $state("User...");
     let menus: Array<Menu> = $state([]);
 
-    let groceryLists = $state([1]);
+    let groceryLists: Array<number> = $state([]);
 
     onMount(() => {
         fetch(`${APIUrl}/api/user?${new URLSearchParams({
@@ -22,6 +22,10 @@
         fetch(`${APIUrl}/api/menu/list`)
             .then((resp) => resp.json())
             .then((respJson) => menus = respJson)
+            .catch((error) => console.error(error));
+        fetch(`${APIUrl}/api/v1/grocery_list`)
+            .then((resp) => resp.json())
+            .then((respJson) => groceryLists = respJson)
             .catch((error) => console.error(error));
     })
 </script>
@@ -40,9 +44,7 @@
 <h1 class="text-4xl text-center mb-8 text-black dark:text-white">Shopping Lists</h1>
 
 <div class="flex flex-col my-4 px-4 space-y-4">
-    {#each groceryLists as groceryList}
-        <GroceryListRow />
+    {#each groceryLists as groceryListId}
+        <GroceryListRow groceryListId={groceryListId} />
     {/each}
 </div>
-
-<!-- <h1 class="text-4xl text-center my-4">Shopping Lists</h1> -->

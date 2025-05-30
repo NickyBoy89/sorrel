@@ -1,57 +1,25 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import InteractiveBox from "../ui/interactiveBox.svelte";
-    import UiButton from "../uiButton.svelte";
+    import { APIUrl } from "../../../constants";
 
-    let expanded = $state(true);
+    let { groceryListId } = $props();
 
-    let numShared = 3;
+    let itemCount = $state(-1);
 
-    const toggleRowExpand = () => {
-        expanded = !expanded;
-    };
+    onMount(() => {
+        fetch(`${APIUrl}/api/v1/grocery_list/${groceryListId}`)
+            .then(resp => resp.json())
+            .then(respJson => itemCount = respJson.size)
+            .catch(error => console.error(error));
+    })
 </script>
 
 <InteractiveBox>
-    <div class="flex flex-row justify-between">
-        
-        <div class="flex flex-col space-y-4">
-            <div class="flex flex-row items-baseline">
-                <div class="flex flex-row text-2xl pl-2 pr-2 font-bold items-center">
-                    Groceries:
-                </div>
-                <div class="text-lg font-medium mr-4">
-                    Apples, Oranges, Pears...
-                </div>
-                <div class="text-sm">
-                    &mdash; 2 items
-                </div>
-            </div>
-            {#if expanded}
-            <div class="flex flex-col text-center">
-                <div class="text-lg font-bold">Contains:</div>
-                <ul class="list-inside list-disc">
-                    <li>Apples</li>
-                    <li>Oranges</li>
-                    <li>Pears</li>
-                </ul>
-            </div>
-            {/if}
+    <a href="/grocery_list/?id={groceryListId}">
+        <div class="flex flex-row justify-between items-center">
+            <div class="text-xl font-semibold">Groceries</div>
+            <div class="text-md">{itemCount} remaining</div>
         </div>
-        <div class="flex flex-col space-y-4">
-            <div class="flex flex-row items-center space-x-4">
-                <div>Shared with {numShared} people</div>
-                <UiButton text={expanded ? "Less" : "More"} action={toggleRowExpand}/>
-            </div>
-            {#if expanded}
-            <div class="flex flex-col text-center">
-                <div class="text-lg font-bold">Shared with:</div>
-                <ul class="list-inside list-disc ">
-                    <li>Nicholas Novak</li>
-                    <li>Your Mother</li>
-                    <li>Allen Price</li>
-                </ul>
-            </div>
-            {/if}
-        </div>
-    </div>
+    </a>
 </InteractiveBox>

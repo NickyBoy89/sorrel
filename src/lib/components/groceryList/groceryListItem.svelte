@@ -1,10 +1,11 @@
 <script lang="ts">
+  let { text, checked = false } = $props();
 </script>
 
 <form class="">
     <label class="flex flex-row space-x-2 cursor-pointer select-none align-middle font-semibolds">
-    <input type="checkbox" name="checked" id="checked" class="circle-checkbox cursor-pointer my-auto">
-    <span class="align-middle text-lg grocery-item-text">2 Beets</span>
+    <input type="checkbox" name="checked" id="checked" class="circle-checkbox cursor-pointer my-auto" checked={checked}>
+    <span class="align-middle text-lg w-full grocery-item-text header-underlined py-2">{text}</span>
     </label>
 </form>
 
@@ -43,5 +44,9 @@
 
     .circle-checkbox:checked ~ .grocery-item-text {
         color: var(--color-neutral-500);
+    }
+
+    .header-underlined {
+        border-bottom: 1px solid var(--color-neutral-800);
     }
 </style>
