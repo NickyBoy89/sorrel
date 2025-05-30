@@ -15,6 +15,11 @@ type GroceryItem struct {
 	Checked  bool    `json:"checked"`
 }
 
+type GroceryListInfo struct {
+	Size int `json:"size"`
+	// Name string `json:"name"`
+}
+
 // `handleGroceryListAction` handles the CRUD actions of a grocery list
 func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
@@ -132,6 +137,37 @@ WHERE grocery_list_contents.grocery_list_id = ?`, groceryId)
 	}
 }
 
+func handleGetGroceryList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	rawGroceryId := r.PathValue("groceryListId")
+
+	groceryId, err := strconv.Atoi(rawGroceryId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	var resp GroceryListInfo
+
+	if err := db.QueryRow("SELECT COUNT(*) FROM grocery_list_contents WHERE grocery_list_id = ?", groceryId).Scan(&resp.Size); err != nil {
+		log.Error("error counting items in grocery list", "error", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Error("error encoding grocery list info", "error", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
 func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
@@ -140,6 +176,33 @@ func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
 		if _, err := db.Exec("INSERT INTO grocery_lists DEFAULT VALUES"); err != nil {
 			log.Error("error creating new grocery item", "error", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	case http.MethodGet:
+		lists := []int{}
+
+		rows, err := db.Query("SELECT id FROM grocery_lists")
+		if err != nil {
+			log.Error("error fetching grocery lists", "error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var id int
+			if err := rows.Scan(&id); err != nil {
+				log.Error("error reading row", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			lists = append(lists, id)
+		}
+
+		if err := json.NewEncoder(w).Encode(lists); err != nil {
+			log.Error("error encoding grocery lists", "error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	default:
