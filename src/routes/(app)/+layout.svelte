@@ -41,6 +41,16 @@
 
 {@render children()}
 <BottomBar>
-	<House size={32} weight={selectedTab === 0 ? "fill" : "regular"} class="cursor-pointer" onclick={() => (selectedTab = 0)} />
-	<User size={32} weight={selectedTab === 1 ? "fill" : "regular"} class="cursor-pointer" onclick={() => (selectedTab = 1)} />
+	<House
+		size={32}
+		weight={selectedTab === 0 ? "fill" : "regular"}
+		class="cursor-pointer"
+		onclick={() => (selectedTab = 0)}
+	/>
+	<User
+		size={32}
+		weight={selectedTab === 1 ? "fill" : "regular"}
+		class="cursor-pointer"
+		onclick={() => (selectedTab = 1)}
+	/>
 </BottomBar>
