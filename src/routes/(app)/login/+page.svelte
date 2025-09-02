@@ -1,8 +1,7 @@
 <script lang="ts">
-    import Fa from 'svelte-fa'
-    import { faBell } from '@fortawesome/free-solid-svg-icons'
     import { handleSubscribe } from '$lib/notificationManager';
     import { goto } from '$app/navigation';
+    import { Bell } from 'phosphor-svelte';
 
     let statusMessage = $state("");
     let statusBorder = $state("var(--color-zinc-700)");
@@ -61,7 +60,7 @@
             {:else}
             <div class="flex flex-col gap-y-8 py-8 px-4">
                 <h2 class="text-xl">In order to deliver your menus, we need your permission to send you a notification when that happens.</h2>
-                <button onclick={subscribeUser} class="flex justify-center object-none text-7xl cursor-pointer rounded-md px-4 py-3"><Fa icon={faBell} id="bell-icon" /></button>
+                <button onclick={subscribeUser} class="flex justify-center object-none text-7xl cursor-pointer rounded-md px-4 py-3"><Bell id="bell-icon" /></button>
             </div>
             {/if}
         </div>

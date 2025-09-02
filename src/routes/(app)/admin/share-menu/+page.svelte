@@ -1,8 +1,7 @@
 <script lang="ts">
     import UiButton from "$lib/components/uiButton.svelte";
-    import { onMount } from "svelte";
-    import Fa from 'svelte-fa'
-    import { faSpinner, faCheck, faXmark, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
+    import { onMount, type Component } from "svelte";
+    import { Check, Spinner, X } from "phosphor-svelte"
     import { APIUrl } from "../../../../constants";
     import { bearerToken } from "../../stores";
     import { get } from "svelte/store";
@@ -18,7 +17,7 @@
     let menuId: number;
 
     let users = $state([] as Array<User>);
-    let icons: Map<number, IconDefinition> = $state(new Map());
+    let icons: Map<number, Component> = $state(new Map());
 
     let selected: Set<number> = new Set();
 
@@ -59,7 +58,7 @@
         const selectedUserIds = Array.from(selected);
 
         selectedUserIds.forEach(userId => {
-            icons.set(userId, faSpinner);
+            icons.set(userId, Spinner);
         });
 
         fetch(`${APIUrl}/api/menu/share`, {
@@ -76,7 +75,7 @@
             console.log(returnStatuses);
 
             for (let [userId, success] of Object.entries(returnStatuses)) {
-                icons.set(Number.parseInt(userId), success ? faCheck : faXmark);
+                icons.set(Number.parseInt(userId), success ? Check : X);
             }
         })
         .catch((error) => console.error(error))
@@ -86,7 +85,7 @@
 <div class="text-black dark:text-white">
     <ol>
     {#each users as user}
-        <li>Id: {user.id}, Name: {user.display_name}<input type="checkbox" data-userid={user.id} onchange={handleUserChecked}>{#if icons.has(user.id)}<Fa icon={icons.get(user.id) as IconDefinition} />{/if}</li>
+        <li>Id: {user.id}, Name: {user.display_name}<input type="checkbox" data-userid={user.id} onchange={handleUserChecked}>{#if icons.has(user.id)}{icons.get(user.id)}{/if}</li>
     {/each}
     </ol>
     
