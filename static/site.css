@@ -6,7 +6,6 @@
 html {
   color: black;
   background-color: var(--color-white);
-  font-family: "Nunito", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

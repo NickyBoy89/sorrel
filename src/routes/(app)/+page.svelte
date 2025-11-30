@@ -32,11 +32,9 @@
   });
 </script>
 
-<Navbar>
-  <UserStatus userName={username} />
-</Navbar>
-
-<h1 class="text-3xl px-4 mb-4 text-black dark:text-white font-semibold">
+<h1
+  class="font-mono text-xl px-4 my-4 text-black dark:text-white font-semibold"
+>
   Shared With You
 </h1>
 <div class="flex flex-col my-4 px-4 space-y-4">

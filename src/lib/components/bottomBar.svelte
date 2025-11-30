@@ -1,23 +1,35 @@
 <script lang="ts">
-  import { type Snippet } from "svelte";
+  import { type Component } from "svelte";
 
-  type BottomBarProps = {
-    children: Snippet;
+  type BottomBarOption = {
+    icon: Component;
+    optionName: string;
   };
 
-  let selectedTab = 0;
+  type BottomBarProps = {
+    options: readonly BottomBarOption[];
+    selected: (typeof options)[number]["optionName"];
+  };
 
-  let { children }: BottomBarProps = $props();
+  let { options, selected = $bindable() }: BottomBarProps = $props();
 </script>
 
 <div
-  class="bottom-bar-container justify-evenly flex flex-row py-1 gap-x-8 bg-white border border-neutral-700"
+  class="fixed-bar justify-evenly flex flex-row py-1 gap-x-8 dark:bg-neutral-900 bg-white border border-neutral-700"
 >
-  {@render children()}
+  {#each options as option}
+    {@const OptionIcon = option.icon}
+    <OptionIcon
+      size={32}
+      weight={selected === option.optionName ? "fill" : "regular"}
+      class="cursor-pointer"
+      onclick={() => (selected = option.optionName)}
+    />
+  {/each}
 </div>
 
 <style>
-  .bottom-bar-container {
+  .fixed-bar {
     position: fixed;
     bottom: 0;
     left: 0;
