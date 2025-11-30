@@ -1,38 +1,41 @@
 <script lang="ts">
-	import '../../../app.css';
-	import { goto } from '$app/navigation';
-    import { onMount } from 'svelte';
-    import { handleSubscribe, isSubscriptionValid } from '$lib/notificationManager';
-    import { initKeycloak } from '$lib/auth';
-	let { children } = $props();
-    
-	let userId;
+  import "../../../app.css";
+  import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
+  import {
+    handleSubscribe,
+    isSubscriptionValid,
+  } from "$lib/notificationManager";
+  import { initKeycloak } from "$lib/auth";
+  let { children } = $props();
 
-	onMount(() => {
-		initKeycloak();
+  let userId;
 
-		userId = localStorage.getItem("userId");
-		if (userId === null) {
-			goto("/login");
-			return;
-		}
+  onMount(() => {
+    initKeycloak();
 
-		(async () => {
-			console.log("Testing subscription...");
+    userId = localStorage.getItem("userId");
+    if (userId === null) {
+      goto("/login");
+      return;
+    }
 
-			const isValid = await isSubscriptionValid();
+    (async () => {
+      console.log("Testing subscription...");
 
-			console.log(`Valid: ${isValid}`);
+      const isValid = await isSubscriptionValid();
 
-			if (!isValid) {
-				console.log("Resubscribing...");
-				await handleSubscribe(Number.parseInt(userId as string));
-			}
-			
-		})()
-	});
+      console.log(`Valid: ${isValid}`);
+
+      if (!isValid) {
+        console.log("Resubscribing...");
+        await handleSubscribe(Number.parseInt(userId as string));
+      }
+    })();
+  });
 </script>
 
-<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/site.css" />
 
 {@render children()}
+

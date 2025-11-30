@@ -1,93 +1,101 @@
 <script lang="ts">
-    import UiButton from "$lib/components/uiButton.svelte";
-    import { onMount, type Component } from "svelte";
-    import { Check, Spinner, X } from "phosphor-svelte"
-    import { APIUrl } from "../../../../constants";
-    import { bearerToken } from "../../stores";
-    import { get } from "svelte/store";
-    import { page } from "$app/state";
+  import UiButton from "$lib/components/uiButton.svelte";
+  import { onMount, type Component } from "svelte";
+  import { Check, Spinner, X } from "phosphor-svelte";
+  import { APIUrl } from "../../../../constants";
+  import { bearerToken } from "../../stores";
+  import { get } from "svelte/store";
+  import { page } from "$app/state";
 
-    type User = {
-        id: number,
-        display_name: string,
-    };
+  type User = {
+    id: number;
+    display_name: string;
+  };
 
-    type Checkbox = Event & { currentTarget: EventTarget & HTMLInputElement};
+  type Checkbox = Event & { currentTarget: EventTarget & HTMLInputElement };
 
-    let menuId: number;
+  let menuId: number;
 
-    let users = $state([] as Array<User>);
-    let icons: Map<number, Component> = $state(new Map());
+  let users = $state([] as Array<User>);
+  let icons: Map<number, Component> = $state(new Map());
 
-    let selected: Set<number> = new Set();
+  let selected: Set<number> = new Set();
 
-    onMount(() => {
-        const rawId = page.url.searchParams.get("menu-id");
-        if (rawId != null) {
-            menuId = Number.parseInt(rawId);
-        }
+  onMount(() => {
+    const rawId = page.url.searchParams.get("menu-id");
+    if (rawId != null) {
+      menuId = Number.parseInt(rawId);
+    }
+  });
+
+  bearerToken.subscribe((token) => {
+    if (token == undefined) return;
+
+    fetch(`${APIUrl}/api/users`, {
+      headers: {
+        Authorization: `Bearer: ${token}`,
+      },
+    })
+      .then((resp) => resp.json())
+      .then((resp) => (users = resp))
+      .catch((error) => console.error(error));
+  });
+
+  const handleUserChecked = (event: Checkbox) => {
+    const id = event?.currentTarget?.dataset.userid;
+    if (id == undefined) return;
+
+    const userId = Number.parseInt(id);
+
+    if (event?.currentTarget?.checked) {
+      selected.add(userId);
+    } else {
+      selected.delete(userId);
+    }
+  };
+
+  const handleSendNotifications = () => {
+    const selectedUserIds = Array.from(selected);
+
+    selectedUserIds.forEach((userId) => {
+      icons.set(userId, Spinner);
     });
 
-    bearerToken.subscribe(token => {
-        if (token == undefined) return;
-        
-        fetch(`${APIUrl}/api/users`, {
-            headers: {
-                Authorization: `Bearer: ${token}`
-            },
-        })
-            .then((resp) => resp.json())
-            .then((resp) => users = resp)
-            .catch((error) => console.error(error));
-    });
+    fetch(`${APIUrl}/api/menu/share`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer: ${get(bearerToken)}`,
+      },
+      body: JSON.stringify({
+        menuId: menuId,
+        users: selectedUserIds,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((returnStatuses: Object) => {
+        console.log(returnStatuses);
 
-    const handleUserChecked = (event: Checkbox) => {
-        const id = event?.currentTarget?.dataset.userid;
-        if (id == undefined) return;
-
-        const userId = Number.parseInt(id)
-        
-        if (event?.currentTarget?.checked) {
-            selected.add(userId);
-        } else {
-            selected.delete(userId);
+        for (let [userId, success] of Object.entries(returnStatuses)) {
+          icons.set(Number.parseInt(userId), success ? Check : X);
         }
-    }
-
-    const handleSendNotifications = () => {
-        const selectedUserIds = Array.from(selected);
-
-        selectedUserIds.forEach(userId => {
-            icons.set(userId, Spinner);
-        });
-
-        fetch(`${APIUrl}/api/menu/share`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer: ${get(bearerToken)}`,
-            },
-            body: JSON.stringify({
-                menuId: menuId,
-                users: selectedUserIds,
-            }),
-        }).then(resp => resp.json())
-        .then((returnStatuses: Object) => {
-            console.log(returnStatuses);
-
-            for (let [userId, success] of Object.entries(returnStatuses)) {
-                icons.set(Number.parseInt(userId), success ? Check : X);
-            }
-        })
-        .catch((error) => console.error(error))
-    }
+      })
+      .catch((error) => console.error(error));
+  };
 </script>
 
 <div class="text-black dark:text-white">
-    <ol>
+  <ol>
     {#each users as user}
-        <li>Id: {user.id}, Name: {user.display_name}<input type="checkbox" data-userid={user.id} onchange={handleUserChecked}>{#if icons.has(user.id)}{icons.get(user.id)}{/if}</li>
+      <li>
+        Id: {user.id}, Name: {user.display_name}<input
+          type="checkbox"
+          data-userid={user.id}
+          onchange={handleUserChecked}
+        />{#if icons.has(user.id)}{icons.get(user.id)}{/if}
+      </li>
     {/each}
-    </ol>
-    
-    <UiButton text="Share" action={handleSendNotifications} />
+  </ol>
+
+  <UiButton text="Share" action={handleSendNotifications} />
 </div>
+

@@ -1,50 +1,62 @@
-<script lang="ts">;
-    import MenuSelector from "$lib/components/menuSelector.svelte";
-    import Navbar from "$lib/components/navbar.svelte";
-    import UserStatus from "$lib/components/userStatus.svelte";
-    import { toJsDate } from "$lib/tools.js";
-    import { onMount } from "svelte";
-    import { APIUrl } from "../../constants";
-    import GroceryListRow from "$lib/components/groceryList/groceryListRow.svelte";
+<script lang="ts">
+  import MenuSelector from "$lib/components/menuSelector.svelte";
+  import Navbar from "$lib/components/navbar.svelte";
+  import UserStatus from "$lib/components/userStatus.svelte";
+  import { toJsDate } from "$lib/tools.js";
+  import { onMount } from "svelte";
+  import { APIUrl } from "../../constants";
+  import GroceryListRow from "$lib/components/groceryList/groceryListRow.svelte";
 
-    let username = $state("User...");
-    let menus: Array<Menu> = $state([]);
+  let username = $state("User...");
+  let menus: Array<Menu> = $state([]);
 
-    let groceryLists: Array<number> = $state([]);
+  let groceryLists: Array<number> = $state([]);
 
-    onMount(() => {
-        fetch(`${APIUrl}/api/user?${new URLSearchParams({
-            userId: `${localStorage.getItem("userId")}`,
-        })}`)
-            .then((resp) => resp.json())
-            .then((user) => username = user.display_name)
-            .catch((error) => console.error(error));
-        fetch(`${APIUrl}/api/menu/list`)
-            .then((resp) => resp.json())
-            .then((respJson) => menus = respJson)
-            .catch((error) => console.error(error));
-        fetch(`${APIUrl}/api/v1/grocery_list`)
-            .then((resp) => resp.json())
-            .then((respJson) => groceryLists = respJson)
-            .catch((error) => console.error(error));
-    })
+  onMount(() => {
+    fetch(
+      `${APIUrl}/api/user?${new URLSearchParams({
+        userId: `${localStorage.getItem("userId")}`,
+      })}`,
+    )
+      .then((resp) => resp.json())
+      .then((user) => (username = user.display_name))
+      .catch((error) => console.error(error));
+    fetch(`${APIUrl}/api/menu/list`)
+      .then((resp) => resp.json())
+      .then((respJson) => (menus = respJson))
+      .catch((error) => console.error(error));
+    fetch(`${APIUrl}/api/v1/grocery_list`)
+      .then((resp) => resp.json())
+      .then((respJson) => (groceryLists = respJson))
+      .catch((error) => console.error(error));
+  });
 </script>
 
 <Navbar>
-    <UserStatus userName={username} />
+  <UserStatus userName={username} />
 </Navbar>
 
-<h1 class="text-4xl text-center mb-8 text-black dark:text-white">Shared With You</h1>
+<h1 class="text-3xl px-4 mb-4 text-black dark:text-white font-semibold">
+  Shared With You
+</h1>
 <div class="flex flex-col my-4 px-4 space-y-4">
-    {#each menus as menu}
-        <MenuSelector menuName={menu.name} menuDate={toJsDate(menu.date)} menuId={menu.id} canEdit={false}/>
-    {/each}
+  {#each menus as menu}
+    <MenuSelector
+      menuName={menu.name}
+      menuDate={toJsDate(menu.date)}
+      menuId={menu.id}
+      canEdit={false}
+    />
+  {/each}
 </div>
 
-<h1 class="text-4xl text-center mb-8 text-black dark:text-white">Shopping Lists</h1>
+<h1 class="text-4xl text-center mb-8 text-black dark:text-white">
+  Shopping Lists
+</h1>
 
 <div class="flex flex-col my-4 px-4 space-y-4">
-    {#each groceryLists as groceryListId}
-        <GroceryListRow groceryListId={groceryListId} />
-    {/each}
+  {#each groceryLists as groceryListId}
+    <GroceryListRow {groceryListId} />
+  {/each}
 </div>
+
