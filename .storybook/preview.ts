@@ -1,4 +1,5 @@
 import type { Preview } from '@storybook/sveltekit'
+import '../src/app.css';
 
 const preview: Preview = {
   parameters: {
@@ -14,6 +15,12 @@ const preview: Preview = {
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: 'todo'
+    },
+
+    backgrounds: {
+      options: {
+        dark: { name: 'Dark', value: '#333' },
+      }
     }
   },
 };
