@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -12,6 +13,10 @@ import (
 	"strconv"
 	"time"
 
+	"git.nicholasnovak.io/recipe_planning/backend/internal/auth"
+	"git.nicholasnovak.io/recipe_planning/backend/internal/config"
+	"git.nicholasnovak.io/recipe_planning/backend/internal/handlers"
+	"git.nicholasnovak.io/recipe_planning/backend/internal/middleware"
 	"github.com/SherClockHolmes/webpush-go"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -20,15 +25,7 @@ import (
 var (
 	serverPort = 9031
 	debug      = false
-	authMethod string
 )
-
-type Config struct {
-	PublicKey        string `json:"public_key"`
-	PrivateKey       string `json:"private_key"`
-	KeycloakHostname string `json:"keycloak_hostname,omitempty"`
-	KeycloakRealmId  string `json:"keycloak_realm_id,omitempty"`
-}
 
 type Menu struct {
 	Id   int       `json:"id"`
@@ -43,12 +40,13 @@ type MenuItem struct {
 	Section     *string `json:"section,omitempty"`
 }
 
+var conf *config.Config
+
 var db *sql.DB
 
 func init() {
 	serveCommand.Flags().IntVar(&serverPort, "port", 9031, "The port to listen on")
 	serveCommand.Flags().BoolVar(&debug, "debug", false, "Enable debug logging")
-	serveCommand.Flags().StringVar(&authMethod, "auth-method", "keycloak", "The auth method used to access the database")
 }
 
 var serveCommand = &cobra.Command{
@@ -81,22 +79,31 @@ var serveCommand = &cobra.Command{
 		}
 
 		// Initialize auth
+		keycloakAuthClient, err := auth.New(context.Background(), conf)
+		if err != nil {
+			log.Error("error initializing auth client", "error", err)
+			return
+		}
+		authHandler := handlers.NewAuthHandler(keycloakAuthClient)
 
-		SetAuthMethod(authMethod)
+		authMiddleware := middleware.NewAuthMiddleware(context.Background(), keycloakAuthClient)
 
 		// Serve frontend
 		http.Handle("/", http.FileServer(http.Dir("build/")))
 
+		http.HandleFunc("/api/auth/login", authHandler.LoginHandler)
+		http.HandleFunc("/api/auth/callback", authHandler.CallbackHandler)
+
 		// Application
 		http.HandleFunc("/api/menu/{menuId}", handleGetMenu)
-		http.Handle("/api/menu/{menuId}/edit", authHandlerFunc(handleEditMenu))
+		http.Handle("/api/menu/{menuId}/edit", authMiddleware.RequireAuth(http.HandlerFunc(handleEditMenu)))
 		http.HandleFunc("/api/menu/{menuId}/items", handleGetMenuItems)
-		http.Handle("/api/menu/{menuId}/create-item", authHandlerFunc(handleCreateMenuItem))
+		http.Handle("/api/menu/{menuId}/create-item", authMiddleware.RequireAuth(http.HandlerFunc(handleCreateMenuItem)))
 		http.HandleFunc("/api/menu/list", handleListMenus)
-		http.Handle("/api/menu/create", authHandlerFunc(handleCreateMenu))
-		http.Handle("/api/menu/share", authHandlerFunc(handleShareMenu))
-		http.Handle("/api/items/{itemId}/edit", authHandlerFunc(handleEditMenuItem))
-		http.Handle("/api/items/{itemId}/delete", authHandlerFunc(handleDeleteMenuItem))
+		http.Handle("/api/menu/create", authMiddleware.RequireAuth(http.HandlerFunc(handleCreateMenu)))
+		http.Handle("/api/menu/share", authMiddleware.RequireAuth(http.HandlerFunc(handleShareMenu)))
+		http.Handle("/api/items/{itemId}/edit", authMiddleware.RequireAuth(http.HandlerFunc(handleEditMenuItem)))
+		http.Handle("/api/items/{itemId}/delete", authMiddleware.RequireAuth(http.HandlerFunc(handleDeleteMenuItem)))
 
 		// Grocery lists
 		http.HandleFunc("/api/v1/grocery_list/{groceryListId}/items", handleGroceryListAction)
@@ -105,7 +112,7 @@ var serveCommand = &cobra.Command{
 
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)
-		http.Handle("/api/users", authHandlerFunc(handleListUsers))
+		http.HandleFunc("/api/users", authMiddleware.RequireAuth(http.HandlerFunc(handleListUsers)))
 		http.HandleFunc("/api/user", handleGetUser)
 
 		// Push
@@ -137,7 +144,7 @@ func readConfigFile(fileName string) error {
 				return err
 			}
 
-			conf := Config{
+			conf := config.Config{
 				PrivateKey: priv,
 				PublicKey:  pub,
 			}
@@ -157,15 +164,12 @@ func readConfigFile(fileName string) error {
 
 	// Load values from config
 
-	var conf Config
 	if err := json.NewDecoder(configFile).Decode(&conf); err != nil {
 		return err
 	}
 
 	priv = conf.PrivateKey
 	pub = conf.PublicKey
-	keycloakHostname = conf.KeycloakHostname
-	keycloakRealmId = conf.KeycloakRealmId
 
 	return nil
 }
