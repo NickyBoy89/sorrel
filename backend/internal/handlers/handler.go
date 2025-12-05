@@ -9,23 +9,22 @@ import (
 	"net/http"
 	"time"
 
-	// "authorization_flow_keycloak/internal/auth"
-	// "authorization_flow_keycloak/internal/store"
-
-	// "github.com/gin-gonic/gin"
 	"git.nicholasnovak.io/recipe_planning/backend/internal/auth"
 	"golang.org/x/oauth2"
 )
 
-type AuthHandler struct {
-	authClient *auth.Client
-	// authStore  store.AuthStore
+type AuthHandler interface {
+	LoginHandler(w http.ResponseWriter, r *http.Request)
+	CallbackHandler(w http.ResponseWriter, r *http.Request)
 }
 
-func NewAuthHandler(authClient *auth.Client) *AuthHandler {
-	return &AuthHandler{
+type OIDCAuthHandler struct {
+	authClient *auth.Client
+}
+
+func NewAuthHandler(authClient *auth.Client) *OIDCAuthHandler {
+	return &OIDCAuthHandler{
 		authClient: authClient,
-		// authStore:  authStore,
 	}
 }
 
@@ -49,7 +48,7 @@ var SessionStore = make(map[string]auth.SessionData)
 // Returns:
 // - 302: Redirects to Keycloak login page
 // - 500: Internal Server Error if state generation or storage fails
-func (a *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (a *OIDCAuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	state, err := generateRandomSecureString()
 	if err != nil {
 		slog.Error("failed to generate state", "error", err)
@@ -71,7 +70,7 @@ func (a *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
-func (a *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (a *OIDCAuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		slog.Error("failed to parse form values for callback", "error", err)
@@ -137,7 +136,7 @@ type oidcClaims struct {
 }
 
 // ValidateIDToken verifies the id token from the oauth2token
-func (a *AuthHandler) validateAndGetClaimsIDToken(
+func (a *OIDCAuthHandler) validateAndGetClaimsIDToken(
 	r *http.Request, oauth2Token *oauth2.Token) (*oidcClaims, error) {
 	// Get and validate the ID token - this proves the user's identity
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
@@ -156,7 +155,7 @@ func (a *AuthHandler) validateAndGetClaimsIDToken(
 	return &claims, nil
 }
 
-func (a *AuthHandler) tokenExchange(r *http.Request) (*oauth2.Token, error) {
+func (a *OIDCAuthHandler) tokenExchange(r *http.Request) (*oauth2.Token, error) {
 	authorizationCode := r.Form.Get("code")
 	if authorizationCode == "" {
 		return nil, errors.New("authorizationCode is required")
@@ -171,7 +170,7 @@ func (a *AuthHandler) tokenExchange(r *http.Request) (*oauth2.Token, error) {
 	return oauth2Token, nil
 }
 
-func (a *AuthHandler) validateStateSession(r *http.Request) error {
+func (a *OIDCAuthHandler) validateStateSession(r *http.Request) error {
 	// Get state from callback parameters
 	stateParam := r.Form.Get("state")
 	if stateParam == "" {

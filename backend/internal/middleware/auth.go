@@ -10,19 +10,23 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 )
 
-type AuthMiddleware struct {
+type AuthMiddleware interface {
+	RequireAuth(handler http.Handler) http.HandlerFunc
+}
+
+type OIDCAuthMiddleware struct {
 	authClient *auth.Client
 }
 
 // NewAuthMiddleware creates a new authentication middleware with OIDC verification
 func NewAuthMiddleware(c context.Context,
 	authClient *auth.Client,
-) *AuthMiddleware {
-	return &AuthMiddleware{
+) *OIDCAuthMiddleware {
+	return &OIDCAuthMiddleware{
 		authClient: authClient,
 	}
 }
-func (m *AuthMiddleware) RequireAuth(handler http.Handler) http.HandlerFunc {
+func (m *OIDCAuthMiddleware) RequireAuth(handler http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get session from cookie
 		sessionID, err := r.Cookie("session_id")

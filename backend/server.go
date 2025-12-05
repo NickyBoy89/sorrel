@@ -25,6 +25,7 @@ import (
 var (
 	serverPort = 9031
 	debug      = false
+	authMethod string
 )
 
 type Menu struct {
@@ -47,6 +48,7 @@ var db *sql.DB
 func init() {
 	serveCommand.Flags().IntVar(&serverPort, "port", 9031, "The port to listen on")
 	serveCommand.Flags().BoolVar(&debug, "debug", false, "Enable debug logging")
+	serveCommand.Flags().StringVar(&authMethod, "auth-method", "keycloak", "The method used to restrict access to non-public API endpoints")
 }
 
 var serveCommand = &cobra.Command{
@@ -79,14 +81,32 @@ var serveCommand = &cobra.Command{
 		}
 
 		// Initialize auth
-		keycloakAuthClient, err := auth.New(context.Background(), conf)
-		if err != nil {
-			log.Error("error initializing auth client", "error", err)
+
+		var authMiddleware middleware.AuthMiddleware
+		var authHandler handlers.AuthHandler
+
+		switch authMethod {
+		case "none":
+			log.Warn("Authentification disabled! Please enable this before exposing this service to the internet")
+
+			authHandler = &handlers.NoAuthHandler{}
+			authMiddleware = &middleware.NoAuthHandler{}
+
+		case "keycloak":
+			log.Info("Tailscale authentification enabled")
+
+			keycloakAuthClient, err := auth.New(context.Background(), conf)
+			if err != nil {
+				log.Error("error initializing auth client", "error", err)
+				return
+			}
+
+			authHandler = handlers.NewAuthHandler(keycloakAuthClient)
+			authMiddleware = middleware.NewAuthMiddleware(context.Background(), keycloakAuthClient)
+		default:
+			log.Error("unable to find authentication method", "authMethod", authMethod)
 			return
 		}
-		authHandler := handlers.NewAuthHandler(keycloakAuthClient)
-
-		authMiddleware := middleware.NewAuthMiddleware(context.Background(), keycloakAuthClient)
 
 		// Serve frontend
 		http.Handle("/", http.FileServer(http.Dir("build/")))
