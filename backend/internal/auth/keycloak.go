@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"git.nicholasnovak.io/recipe_planning/backend/internal/config"
+	"github.com/NickyBoy89/sorrel/backend/internal/config"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
 )

@@ -1,4 +1,4 @@
-module git.nicholasnovak.io/recipe_planning/backend
+module github.com/NickyBoy89/sorrel/backend
 
 go 1.24.0
 

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"git.nicholasnovak.io/recipe_planning/backend/internal/auth"
+	"github.com/NickyBoy89/sorrel/backend/internal/auth"
 	"golang.org/x/oauth2"
 )
 

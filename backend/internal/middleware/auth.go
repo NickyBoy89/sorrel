@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"git.nicholasnovak.io/recipe_planning/backend/internal/auth"
-	"git.nicholasnovak.io/recipe_planning/backend/internal/handlers"
+	"github.com/NickyBoy89/sorrel/backend/internal/auth"
+	"github.com/NickyBoy89/sorrel/backend/internal/handlers"
 	"github.com/coreos/go-oidc/v3/oidc"
 )
 
