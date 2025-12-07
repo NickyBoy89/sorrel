@@ -3,7 +3,6 @@
   import { onMount, type Component } from "svelte";
   import { Check, Spinner, X } from "phosphor-svelte";
   import { APIUrl } from "../../../../constants";
-  import { bearerToken } from "../../stores";
   import { get } from "svelte/store";
   import { page } from "$app/state";
 
@@ -28,18 +27,10 @@
     }
   });
 
-  bearerToken.subscribe((token) => {
-    if (token == undefined) return;
-
-    fetch(`${APIUrl}/api/users`, {
-      headers: {
-        Authorization: `Bearer: ${token}`,
-      },
-    })
-      .then((resp) => resp.json())
-      .then((resp) => (users = resp))
-      .catch((error) => console.error(error));
-  });
+  fetch(`${APIUrl}/api/users`, {})
+    .then((resp) => resp.json())
+    .then((resp) => (users = resp))
+    .catch((error) => console.error(error));
 
   const handleUserChecked = (event: Checkbox) => {
     const id = event?.currentTarget?.dataset.userid;
@@ -63,9 +54,6 @@
 
     fetch(`${APIUrl}/api/menu/share`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer: ${get(bearerToken)}`,
-      },
       body: JSON.stringify({
         menuId: menuId,
         users: selectedUserIds,
@@ -98,4 +86,3 @@
 
   <UiButton text="Share" action={handleSendNotifications} />
 </div>
-

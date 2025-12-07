@@ -13,8 +13,6 @@
 
   let userId;
 
-  let selectedTab = $state(0);
-
   onMount(() => {
     userId = localStorage.getItem("userId");
     if (userId === null) {
@@ -23,15 +21,10 @@
     }
 
     (async () => {
-      console.log("Testing subscription...");
-
       const isValid = await isSubscriptionValid();
 
-      console.log(`Valid: ${isValid}`);
-
       if (!isValid) {
-        console.log("Resubscribing...");
-        await handleSubscribe(Number.parseInt(userId as string));
+        await handleSubscribe(Number.parseInt(userId));
       }
     })();
   });
@@ -44,6 +37,6 @@
   options={[
     { icon: House, optionName: "home" },
     { icon: User, optionName: "profile" },
-  ]}
+  ] as const}
   selected={"home"}
 />

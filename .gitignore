@@ -1,6 +1,9 @@
 # Sqlite
 *.db
 
+src/constants.ts
+sorrel-config.json
+
 backend/backend
 backend/*.json
 

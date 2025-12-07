@@ -8,9 +8,6 @@
   import { page } from "$app/state";
   import { onMount } from "svelte";
   import UiButtonLink from "$lib/components/uiButtonLink.svelte";
-  import { bearerToken } from "../stores.js";
-  import { get } from "svelte/store";
-  import { initKeycloak } from "$lib/auth.js";
 
   let menuId: string | null = null;
 
@@ -22,7 +19,6 @@
 
   onMount(() => {
     menuId = page.url.searchParams.get("menu-id");
-    initKeycloak();
     fetchMenu();
     fetchMenuItems();
   });
@@ -69,9 +65,6 @@
   const createMenuItem = async () => {
     await fetch(`${APIUrl}/api/menu/${menuId}/create-item`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer: ${get(bearerToken)}`,
-      },
       body: new URLSearchParams({ name: "", description: "" }),
     }).catch((error) => {
       console.log(error);
@@ -115,4 +108,3 @@
     />
   </section>
 </div>
-
