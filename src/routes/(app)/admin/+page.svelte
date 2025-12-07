@@ -3,8 +3,6 @@
   import UiButton from "$lib/components/uiButton.svelte";
   import { onMount } from "svelte";
   import { toJsDate } from "$lib/tools";
-  import { bearerToken } from "../stores";
-  import { get } from "svelte/store";
   import { APIUrl } from "../../../constants";
 
   let menus: Array<any> = $state([] as Array<MenuItemType>);
@@ -28,9 +26,6 @@
 
     await fetch(`${APIUrl}/api/menu/create`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer: ${get(bearerToken)}`,
-      },
       body: new URLSearchParams({
         name: "New Menu",
         date: `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`,
@@ -57,4 +52,3 @@
   {/each}
   <UiButton text="New" action={createMenu} />
 </div>
-
