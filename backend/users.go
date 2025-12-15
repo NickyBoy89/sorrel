@@ -5,6 +5,8 @@ import (
 	log "log/slog"
 	"net/http"
 	"strconv"
+
+	"github.com/NickyBoy89/sorrel/backend/internal/db"
 )
 
 type User struct {
@@ -33,7 +35,7 @@ func handleGetUser(w http.ResponseWriter, r *http.Request) {
 
 	var requestedUser User
 
-	if err := db.QueryRow("SELECT display_name FROM users WHERE id = ?", userId).Scan(&requestedUser.DisplayName); err != nil {
+	if err := db.DB.QueryRow("SELECT display_name FROM users WHERE id = ?", userId).Scan(&requestedUser.DisplayName); err != nil {
 		log.Error("error finding user", "error", err)
 		http.Error(w, "error getting user data", http.StatusInternalServerError)
 		return
@@ -49,7 +51,7 @@ func handleGetUser(w http.ResponseWriter, r *http.Request) {
 func handleListUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	users, err := db.Query("SELECT id, display_name FROM users")
+	users, err := db.DB.Query("SELECT id, display_name FROM users")
 	if err != nil {
 		log.Error("error reading users", "error", err)
 		http.Error(w, "error listing users", http.StatusInternalServerError)

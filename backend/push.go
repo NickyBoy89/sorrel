@@ -7,6 +7,7 @@ import (
 	log "log/slog"
 	"net/http"
 
+	"github.com/NickyBoy89/sorrel/backend/internal/db"
 	"github.com/SherClockHolmes/webpush-go"
 )
 
@@ -47,7 +48,7 @@ func handlePushSubscription(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if _, err := db.Exec("INSERT INTO notification_subscriptions (user_id, endpoint, keys_auth, keys_p256dh) VALUES (?, ?, ?, ?)",
+	if _, err := db.DB.Exec("INSERT INTO notification_subscriptions (user_id, endpoint, keys_auth, keys_p256dh) VALUES (?, ?, ?, ?)",
 		sub.UserID,
 		sub.Sub.Endpoint,
 		sub.Sub.Keys.Auth,
@@ -81,7 +82,7 @@ func handleCheckSubscription(w http.ResponseWriter, r *http.Request) {
 
 	var hasEndpoint bool
 
-	if err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM notification_subscriptions WHERE endpoint = ?);", sub.Endpoint).Scan(&hasEndpoint); err != nil {
+	if err := db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM notification_subscriptions WHERE endpoint = ?);", sub.Endpoint).Scan(&hasEndpoint); err != nil {
 		log.Error("error finding notification endpoint", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -117,7 +118,7 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var menuName string
-	if err := db.QueryRow("SELECT name FROM menus WHERE id = ?", req.MenuId).Scan(&menuName); err != nil {
+	if err := db.DB.QueryRow("SELECT name FROM menus WHERE id = ?", req.MenuId).Scan(&menuName); err != nil {
 		log.Error("error fetching menu data", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -133,7 +134,7 @@ func handleShareMenu(w http.ResponseWriter, r *http.Request) {
 	// Begin a transaction because we're going to read and delete invalid
 	// subscriptions at the same time
 
-	tx, err := db.Begin()
+	tx, err := db.DB.Begin()
 	if err != nil {
 		log.Error("error beginning transaction", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

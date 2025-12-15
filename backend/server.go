@@ -13,8 +13,10 @@ import (
 	"strconv"
 	"time"
 
+	grocerylists "github.com/NickyBoy89/sorrel/backend/grocery_lists"
 	"github.com/NickyBoy89/sorrel/backend/internal/auth"
 	"github.com/NickyBoy89/sorrel/backend/internal/config"
+	"github.com/NickyBoy89/sorrel/backend/internal/db"
 	"github.com/NickyBoy89/sorrel/backend/internal/handlers"
 	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
 	"github.com/SherClockHolmes/webpush-go"
@@ -43,8 +45,6 @@ type MenuItem struct {
 
 var conf *config.Config
 
-var db *sql.DB
-
 func init() {
 	serveCommand.Flags().IntVar(&serverPort, "port", 9031, "The port to listen on")
 	serveCommand.Flags().BoolVar(&debug, "debug", false, "Enable debug logging")
@@ -67,10 +67,10 @@ var serveCommand = &cobra.Command{
 			return
 		}
 		defer recipesDb.Close()
-		db = recipesDb
+		db.DB = recipesDb
 
 		// Setup
-		if err := initDb(db); err != nil {
+		if err := initDb(db.DB); err != nil {
 			log.Error("error initializing database", "error", err)
 			return
 		}
@@ -126,9 +126,7 @@ var serveCommand = &cobra.Command{
 		http.Handle("/api/items/{itemId}/delete", authMiddleware.RequireAuth(http.HandlerFunc(handleDeleteMenuItem)))
 
 		// Grocery lists
-		http.HandleFunc("/api/v1/grocery_list/{groceryListId}/items", handleGroceryListAction)
-		http.HandleFunc("/api/v1/grocery_list/{groceryListId}", handleGetGroceryList)
-		http.HandleFunc("/api/v1/grocery_list", handleCreateGroceryList)
+		grocerylists.RegisterHandlers(http.DefaultServeMux)
 
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)
@@ -210,7 +208,7 @@ func handleCheckUserId(w http.ResponseWriter, r *http.Request) {
 
 	var isValidId bool
 
-	if err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?);", userId).Scan(&isValidId); err != nil {
+	if err := db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?);", userId).Scan(&isValidId); err != nil {
 		log.Error("error testing for user id", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

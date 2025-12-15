@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/NickyBoy89/sorrel/backend/internal/db"
 )
 
 func handleGetMenu(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +24,7 @@ func handleGetMenu(w http.ResponseWriter, r *http.Request) {
 	var name string
 	var date time.Time
 
-	if err := db.QueryRow("SELECT id, name, date FROM menus WHERE id = ?", menuId).Scan(&id, &name, &date); err != nil {
+	if err := db.DB.QueryRow("SELECT id, name, date FROM menus WHERE id = ?", menuId).Scan(&id, &name, &date); err != nil {
 		log.Error("error fetching menu", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -47,7 +49,7 @@ func handleGetMenuItems(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	rows, err := db.Query("SELECT id, name, description, menu_section FROM items WHERE menu_id = ?", menuId)
+	rows, err := db.DB.Query("SELECT id, name, description, menu_section FROM items WHERE menu_id = ?", menuId)
 	if err != nil {
 		log.Error("error fetching menu items", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -111,7 +113,7 @@ func handleCreateMenuItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	_, err = db.Exec("INSERT INTO items (menu_id, name, description) VALUES (?, ?, ?)", menuId, name, description)
+	_, err = db.DB.Exec("INSERT INTO items (menu_id, name, description) VALUES (?, ?, ?)", menuId, name, description)
 	if err != nil {
 		log.Error("error inserting new menu item", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -158,7 +160,7 @@ func handleEditMenuItem(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if _, err := db.Exec("UPDATE items SET name = ?, description = ?, menu_section = ? WHERE id = ?", name, description, section, itemId); err != nil {
+	if _, err := db.DB.Exec("UPDATE items SET name = ?, description = ?, menu_section = ? WHERE id = ?", name, description, section, itemId); err != nil {
 		log.Error("error editing menu item", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -175,7 +177,7 @@ func handleDeleteMenuItem(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	_, err = db.Exec("DELETE FROM items WHERE id = ?", itemId)
+	_, err = db.DB.Exec("DELETE FROM items WHERE id = ?", itemId)
 	if err != nil {
 		log.Error("Error deleting menu item", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -230,7 +232,7 @@ func handleEditMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.Exec("UPDATE menus SET name = ?, date = ? WHERE id = ?", name, date, menuId)
+	_, err = db.DB.Exec("UPDATE menus SET name = ?, date = ? WHERE id = ?", name, date, menuId)
 	if err != nil {
 		log.Error("Error updating menu", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -279,7 +281,7 @@ func handleCreateMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.Exec("INSERT INTO menus (name, date) VALUES (?, ?)", name, date)
+	_, err = db.DB.Exec("INSERT INTO menus (name, date) VALUES (?, ?)", name, date)
 	if err != nil {
 		log.Error("Error inserting new menu", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -292,7 +294,7 @@ func handleListMenus(w http.ResponseWriter, r *http.Request) {
 
 	menus := []Menu{}
 
-	rows, err := db.Query("SELECT id, name, date FROM menus")
+	rows, err := db.DB.Query("SELECT id, name, date FROM menus")
 	if err != nil {
 		log.Error("Error fetching menus", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
