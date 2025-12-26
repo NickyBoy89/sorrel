@@ -45,6 +45,7 @@ func NewMockFramework(registerFunc func(mux *http.ServeMux), initFunc func(*sql.
 
 	m.mux = http.NewServeMux()
 	registerFunc(m.mux)
+	http.DefaultServeMux = m.mux
 
 	m.StartAPIServer()
 
@@ -60,7 +61,7 @@ func InitGlobalDB() (*sql.DB, error) {
 	return testdb, nil
 }
 
-func (m MockFramework) Close() error {
+func (m *MockFramework) Close() error {
 	if err := m.server.Shutdown(context.Background()); err != nil {
 		return err
 	}
@@ -68,7 +69,11 @@ func (m MockFramework) Close() error {
 		return err
 	}
 
-	return os.Remove(dbTestFile)
+	if err := os.Remove(dbTestFile); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Asynchronusly starts a server and returns a handle to it
@@ -97,7 +102,18 @@ func (m *MockFramework) LocalAPIRequest(req *http.Request) (*http.Response, erro
 }
 
 func (m *MockFramework) CheckedRequest(t *testing.T, method, relativeUrl string, body io.Reader) *http.Response {
+	resp := m.Request(t, method, relativeUrl, body)
 
+	if resp.StatusCode != http.StatusOK {
+		message, _ := io.ReadAll(resp.Body)
+		defer resp.Body.Close()
+		t.Error("request did not return successfully", "code", resp.Status, "message", string(message))
+	}
+
+	return resp
+}
+
+func (m *MockFramework) Request(t *testing.T, method, relativeUrl string, body io.Reader) *http.Response {
 	req, err := http.NewRequest(method, localURL(relativeUrl), body)
 	if err != nil {
 		t.Fatal(err)
@@ -108,13 +124,11 @@ func (m *MockFramework) CheckedRequest(t *testing.T, method, relativeUrl string,
 		t.Fatal(err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		message, _ := io.ReadAll(resp.Body)
-		defer resp.Body.Close()
-		t.Error("request did not return successfully", "code", resp.Status, "message", string(message))
-	}
-
 	return resp
+}
+
+func (m *MockFramework) Get(t *testing.T, relativeUrl string) *http.Response {
+	return m.Request(t, http.MethodGet, relativeUrl, nil)
 }
 
 func (m *MockFramework) CheckedPost(t *testing.T, relativeUrl string, body io.Reader) *http.Response {

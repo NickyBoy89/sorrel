@@ -51,7 +51,20 @@ func InitializeDB(db *sql.DB) error {
 	return nil
 }
 
-func FindGroceryList(id int, db *sql.DB) ([]GroceryItem, error) {
+func InsertGroceryList(db *sql.DB) (int64, error) {
+	if resp, err := db.Exec("INSERT INTO grocery_lists DEFAULT VALUES"); err != nil {
+		return 0, err
+	} else {
+		return resp.LastInsertId()
+	}
+}
+
+func FindGroceryList(groceryListId int, db *sql.DB) ([]GroceryItem, error) {
+	var count int
+	if err := db.QueryRow("SELECT 1 FROM grocery_lists WHERE id = ?", groceryListId).Scan(&count); err != nil {
+		return nil, err
+	}
+
 	itemRows, err := db.Query(`SELECT
 			grocery_list_contents.id as id,
 			ingredients.name AS name,
@@ -63,7 +76,7 @@ FROM
 INNER JOIN ingredients ON
 			ingredients.id = grocery_list_contents.id
 WHERE
-			grocery_list_contents.grocery_list_id = ?`, id)
+			grocery_list_contents.grocery_list_id = ?`, groceryListId)
 	if err != nil {
 		return nil, err
 	}
@@ -82,25 +95,20 @@ WHERE
 	return items, nil
 }
 
-func InsertGroceryListItem(input CreateGroceryItem, ingredientId int, groceryListId int, db db.DatabaseLike) (int64, error) {
-	if resp, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity) VALUES (?, ?, ?)", groceryListId, ingredientId, input.Quantity); err != nil {
+func InsertGroceryListItem(input UpdateGroceryItem, groceryListId int, db db.DatabaseLike) (int64, error) {
+	if resp, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity) VALUES (?, ?, ?)", groceryListId, input.Id, input.Quantity); err != nil {
 		return 0, err
 	} else {
 		return resp.LastInsertId()
 	}
 }
 
-func UpdateGroceryList(items []GroceryItem, groceryListId int, tx *sql.Tx) error {
-	// Remove the old items
-	if _, err := tx.Exec("DELETE FROM grocery_list_contents WHERE id = ?", groceryListId); err != nil {
-		return err
+func UpdateGroceryList(items []UpdateGroceryItem, groceryListId int, db *sql.DB) error {
+	for _, item := range items {
+		if _, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity, checked) VALUES (?, ?, ?, ?)", groceryListId, item.Id, item.Quantity, item.Checked); err != nil {
+			return err
+		}
 	}
-
-	// for _, item := range items {
-	// 	if err := InsertGroceryListItem(UpdateGroceryItem{Id: item.Id, Quantity: item.Quantity, Checked: item.Checked}, groceryListId, tx); err != nil {
-	// 		return err
-	// 	}
-	// }
 
 	return nil
 }
@@ -110,5 +118,15 @@ func InsertIngredient(val UpdateIngredient, db *sql.DB) (int64, error) {
 		return 0, err
 	} else {
 		return res.LastInsertId()
+	}
+}
+
+func FindIngredient(ingredientId int, db *sql.DB) (Ingredient, error) {
+	var ingredient Ingredient
+
+	if err := db.QueryRow("SELECT name, category FROM ingredients WHERE id = ?", ingredientId).Scan(&ingredient.Name, &ingredient.Category); err != nil {
+		return ingredient, err
+	} else {
+		return ingredient, nil
 	}
 }

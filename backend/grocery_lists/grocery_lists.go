@@ -1,7 +1,10 @@
 package grocerylists
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	log "log/slog"
 	"net/http"
 	"strconv"
@@ -46,20 +49,18 @@ type UpdateIngredient struct {
 }
 
 func RegisterHandlers(mux *http.ServeMux) {
-	mux.HandleFunc("/api/v1/grocery_list/{groceryListId}", handleGroceryListAction)
-	mux.HandleFunc("/api/v1/grocery_list/", handleCreateGroceryList)
+	mux.HandleFunc("/api/v1/grocery_list/{id}", handleGroceryListAction)
+	mux.HandleFunc("/api/v1/grocery_list", handleCreateGroceryList)
 
-	mux.HandleFunc("/api/v1/grocery_item/{id}", handleIngredientAction)
-	mux.HandleFunc("/api/v1/grocery_item/", handleCreateIngredient)
+	mux.HandleFunc("/api/v1/ingredients/{id}", handleIngredientAction)
+	mux.HandleFunc("/api/v1/ingredients", handleCreateIngredient)
 }
 
 // `handleGroceryListAction` handles the CRUD actions of a grocery list
 func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	rawGroceryId := r.PathValue("groceryListId")
-
-	groceryId, err := strconv.Atoi(rawGroceryId)
+	groceryId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -72,6 +73,10 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 
 		items, err := FindGroceryList(groceryId, db.DB)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
 			log.Error("error querying grocery items", "error", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
@@ -85,31 +90,31 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPatch:
 		defer r.Body.Close()
 
-		var groceryItems []GroceryItem
+		var groceryItems []UpdateGroceryItem
 		if err := json.NewDecoder(r.Body).Decode(&groceryItems); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		tx, err := db.DB.Begin()
-		if err != nil {
-			log.Error("error beginning transaction", "error", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		defer tx.Rollback()
+		// tx, err := db.DB.Begin()
+		// if err != nil {
+		// 	log.Error("error beginning transaction", "error", err)
+		// 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		// 	return
+		// }
+		// defer tx.Rollback()
 
-		if err := UpdateGroceryList(groceryItems, groceryId, tx); err != nil {
+		if err := UpdateGroceryList(groceryItems, groceryId, db.DB); err != nil {
 			log.Error("Error updating grocery list", "error", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
-		if err := tx.Commit(); err != nil {
-			log.Error("error committing grocery list change", "error", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
+		// if err := tx.Commit(); err != nil {
+		// 	log.Error("error committing grocery list change", "error", err)
+		// 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		// 	return
+		// }
 
 	// Delete a shopping list
 	case http.MethodDelete:
@@ -127,16 +132,46 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if _, err := db.DB.Exec("INSERT INTO grocery_lists DEFAULT VALUES"); err != nil {
+	if groceryListId, err := InsertGroceryList(db.DB); err != nil {
 		log.Error("error while creating new grocery list", "error", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
+	} else {
+		fmt.Fprintf(w, "%d", groceryListId)
 	}
 }
 
 func handleIngredientAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
+	ingredientId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		ing, err := FindIngredient(ingredientId, db.DB)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			log.Error("error while finding ingredient", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(ing); err != nil {
+			log.Error("error encoding ingredient", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
 }
 
 func handleCreateIngredient(w http.ResponseWriter, r *http.Request) {
@@ -146,14 +181,21 @@ func handleCreateIngredient(w http.ResponseWriter, r *http.Request) {
 
 	var item UpdateIngredient
 
+	if r.Method != http.MethodPost {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if _, err := InsertIngredient(item, db.DB); err != nil {
+	if id, err := InsertIngredient(item, db.DB); err != nil {
 		log.Error("error inserting ingredient", "error", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
+	} else {
+		fmt.Fprintf(w, "%d", id)
 	}
 }
