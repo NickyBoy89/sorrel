@@ -126,7 +126,7 @@ var serveCommand = &cobra.Command{
 		http.Handle("/api/items/{itemId}/delete", authMiddleware.RequireAuth(http.HandlerFunc(handleDeleteMenuItem)))
 
 		// Grocery lists
-		grocerylists.RegisterHandlers(http.DefaultServeMux)
+		grocerylists.RegisterHandlers(http.DefaultServeMux, authMiddleware)
 
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)

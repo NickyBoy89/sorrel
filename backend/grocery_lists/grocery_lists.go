@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/NickyBoy89/sorrel/backend/internal/db"
+	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
 )
 
 type GroceryItem struct {
@@ -48,12 +49,12 @@ type UpdateIngredient struct {
 	Category *string `json:"category,omitempty"`
 }
 
-func RegisterHandlers(mux *http.ServeMux) {
-	mux.HandleFunc("/api/v1/grocery_list/{id}", handleGroceryListAction)
-	mux.HandleFunc("/api/v1/grocery_list", handleCreateGroceryList)
+func RegisterHandlers(mux *http.ServeMux, auth middleware.AuthMiddleware) {
+	mux.Handle("/api/v1/grocery_list/{id}", auth.RequireAuth(http.HandlerFunc(handleGroceryListAction)))
+	mux.Handle("/api/v1/grocery_list", auth.RequireAuth(http.HandlerFunc(handleCreateGroceryList)))
 
-	mux.HandleFunc("/api/v1/ingredients/{id}", handleIngredientAction)
-	mux.HandleFunc("/api/v1/ingredients", handleCreateIngredient)
+	mux.Handle("/api/v1/ingredients/{id}", auth.RequireAuth(http.HandlerFunc(handleIngredientAction)))
+	mux.Handle("/api/v1/ingredients", auth.RequireAuth(http.HandlerFunc(handleCreateIngredient)))
 }
 
 // `handleGroceryListAction` handles the CRUD actions of a grocery list
