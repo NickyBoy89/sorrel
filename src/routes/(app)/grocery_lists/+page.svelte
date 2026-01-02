@@ -25,7 +25,7 @@
   });
 </script>
 
-<div class="flex flex-col mx-4">
+<div class="flex flex-col m-4 gap-y-4">
   {#each lists as list}
     <a href="/grocery_lists/list?id={list.id}">
       <Card>
