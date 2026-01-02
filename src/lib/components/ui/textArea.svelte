@@ -1,28 +1,21 @@
 <script lang="ts">
-  let { placeholder = "", initialValue = $bindable(""), onchange } = $props();
+  let {
+    placeholder = "",
+    initialValue = $bindable(""),
+    onchange,
+  }: {
+    placeholder?: string;
+    initialValue?: string;
+    onchange: (
+      event: Event & { currentTarget: EventTarget & HTMLInputElement },
+    ) => void;
+  } = $props();
 </script>
 
 <input
   type="text"
-  class="block rounded-sm w-auto text-neutral-900 dark:text-white mt-2 pl-2"
+  class="block rounded-sm pl-2 w-auto h-8 text-neutral-900 dark:text-white bg-white dark:bg-neutral-900 border border-neutral-700"
   {placeholder}
   bind:value={initialValue}
   {onchange}
 />
-
-<style>
-  input {
-    background-color: var(--color-white);
-    border: 1px solid var(--color-zinc-700);
-    height: 2rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    input {
-      background-color: var(--color-zinc-900);
-      border: 1px solid var(--color-zinc-700);
-      height: 2rem;
-    }
-  }
-</style>
-

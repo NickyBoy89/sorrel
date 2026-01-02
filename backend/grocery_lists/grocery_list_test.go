@@ -55,7 +55,7 @@ func TestGetGroceryListItemsV1(t *testing.T) {
 		addGroceryItem(t, "Banana"),
 		addGroceryItem(t, "Grapefruit"),
 	} {
-		if _, err := InsertGroceryListItem(UpdateGroceryItem{Quantity: "1 fruit", Checked: false, Id: int(fruitId)}, 1, db.DB); err != nil {
+		if _, err := InsertGroceryListItem(UpdateGroceryItem{Quantity: "1 fruit", Checked: false, IngredientId: int(fruitId)}, 1, db.DB); err != nil {
 			t.Error(err)
 		}
 	}
@@ -122,7 +122,7 @@ func TestAddItemsToGroceryList(t *testing.T) {
 	eggId := createIngredient(t, f, UpdateIngredient{Name: "Egg"})
 	milkId := createIngredient(t, f, UpdateIngredient{Name: "Milk"})
 
-	if initial, err := json.Marshal([]UpdateGroceryItem{{Id: eggId}, {Id: milkId}}); err != nil {
+	if initial, err := json.Marshal([]UpdateGroceryItem{{IngredientId: eggId}, {IngredientId: milkId}}); err != nil {
 		t.Fatal(err)
 	} else {
 		f.CheckedRequest(t, http.MethodPatch, fmt.Sprintf("/api/v1/grocery_list/%d", listId), bytes.NewBuffer(initial))
@@ -154,13 +154,13 @@ func TestAddAnotherItemToList(t *testing.T) {
 	milkId := createIngredient(t, f, UpdateIngredient{Name: "Milk"})
 	cornId := createIngredient(t, f, UpdateIngredient{Name: "Corn stalks"})
 
-	if encoded, err := json.Marshal([]UpdateGroceryItem{{Id: eggId}, {Id: milkId}}); err != nil {
+	if encoded, err := json.Marshal([]UpdateGroceryItem{{IngredientId: eggId}, {IngredientId: milkId}}); err != nil {
 		t.Fatal(err)
 	} else {
 		f.CheckedRequest(t, http.MethodPatch, fmt.Sprintf("/api/v1/grocery_list/%d", listId), bytes.NewBuffer(encoded))
 	}
 
-	if encoded, err := json.Marshal([]UpdateGroceryItem{{Id: eggId}, {Id: milkId}, {Id: cornId}}); err != nil {
+	if encoded, err := json.Marshal([]UpdateGroceryItem{{IngredientId: eggId}, {IngredientId: milkId}, {IngredientId: cornId}}); err != nil {
 		t.Fatal(err)
 	} else {
 		f.CheckedRequest(t, http.MethodPatch, fmt.Sprintf("/api/v1/grocery_list/%d", listId), bytes.NewBuffer(encoded))

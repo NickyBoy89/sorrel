@@ -9,6 +9,7 @@
   import BottomBar from "$lib/components/bottomBar.svelte";
   import House from "phosphor-svelte/lib/House";
   import User from "phosphor-svelte/lib/User";
+  import List from "phosphor-svelte/lib/List";
   let { children } = $props();
 
   let userId;
@@ -35,8 +36,9 @@
 {@render children()}
 <BottomBar
   options={[
-    { icon: House, optionName: "home" },
-    { icon: User, optionName: "profile" },
+    { icon: House, optionName: "/" as const },
+    { icon: List, optionName: "/grocery_lists" as const },
+    { icon: User, optionName: "/profile" as const },
   ] as const}
   selected={"home"}
 />

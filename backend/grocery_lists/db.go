@@ -51,6 +51,25 @@ func InitializeDB(db *sql.DB) error {
 	return nil
 }
 
+func FindGroceryLists(db *sql.DB) ([]int, error) {
+	rows, err := db.Query("SELECT id FROM grocery_lists")
+	if err != nil {
+		return nil, err
+	}
+
+	listIds := []int{}
+	for rows.Next() {
+		var listId int
+		if err := rows.Scan(&listId); err != nil {
+			return nil, err
+		}
+
+		listIds = append(listIds, listId)
+	}
+
+	return listIds, nil
+}
+
 func InsertGroceryList(db *sql.DB) (int64, error) {
 	if resp, err := db.Exec("INSERT INTO grocery_lists DEFAULT VALUES"); err != nil {
 		return 0, err
@@ -74,7 +93,7 @@ func FindGroceryList(groceryListId int, db *sql.DB) ([]GroceryItem, error) {
 FROM
 			grocery_list_contents
 INNER JOIN ingredients ON
-			ingredients.id = grocery_list_contents.id
+			ingredients.id = grocery_list_contents.ingredient_id
 WHERE
 			grocery_list_contents.grocery_list_id = ?`, groceryListId)
 	if err != nil {
@@ -96,7 +115,7 @@ WHERE
 }
 
 func InsertGroceryListItem(input UpdateGroceryItem, groceryListId int, db db.DatabaseLike) (int64, error) {
-	if resp, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity) VALUES (?, ?, ?)", groceryListId, input.Id, input.Quantity); err != nil {
+	if resp, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity) VALUES (?, ?, ?)", groceryListId, input.IngredientId, input.Quantity); err != nil {
 		return 0, err
 	} else {
 		return resp.LastInsertId()
@@ -105,12 +124,35 @@ func InsertGroceryListItem(input UpdateGroceryItem, groceryListId int, db db.Dat
 
 func UpdateGroceryList(items []UpdateGroceryItem, groceryListId int, db *sql.DB) error {
 	for _, item := range items {
-		if _, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity, checked) VALUES (?, ?, ?, ?)", groceryListId, item.Id, item.Quantity, item.Checked); err != nil {
+		if _, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity, checked) VALUES (?, ?, ?, ?)", groceryListId, item.IngredientId, item.Quantity, item.Checked); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+func FindIngredients(db *sql.DB) ([]Ingredient, error) {
+	rows, err := db.Query("SELECT id FROM ingredients")
+	if err != nil {
+		return nil, err
+	}
+
+	ingredients := []Ingredient{}
+	for rows.Next() {
+		var ingredientId int
+		if err := rows.Scan(&ingredientId); err != nil {
+			return nil, err
+		}
+
+		ing, err := FindIngredient(ingredientId, db)
+		if err != nil {
+			return nil, err
+		}
+		ingredients = append(ingredients, ing)
+	}
+
+	return ingredients, nil
 }
 
 func InsertIngredient(val UpdateIngredient, db *sql.DB) (int64, error) {
@@ -122,7 +164,7 @@ func InsertIngredient(val UpdateIngredient, db *sql.DB) (int64, error) {
 }
 
 func FindIngredient(ingredientId int, db *sql.DB) (Ingredient, error) {
-	var ingredient Ingredient
+	ingredient := Ingredient{Id: ingredientId}
 
 	if err := db.QueryRow("SELECT name, category FROM ingredients WHERE id = ?", ingredientId).Scan(&ingredient.Name, &ingredient.Category); err != nil {
 		return ingredient, err

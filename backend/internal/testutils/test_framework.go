@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/NickyBoy89/sorrel/backend/internal/db"
+	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -26,7 +27,7 @@ type MockFramework struct {
 	client *http.Client
 }
 
-func NewMockFramework(registerFunc func(mux *http.ServeMux), initFunc func(*sql.DB) error) (*MockFramework, error) {
+func NewMockFramework(registerFunc func(mux *http.ServeMux, middleware middleware.AuthMiddleware), initFunc func(*sql.DB) error) (*MockFramework, error) {
 	testdb, err := InitGlobalDB()
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func NewMockFramework(registerFunc func(mux *http.ServeMux), initFunc func(*sql.
 	db.DB = testdb
 
 	m.mux = http.NewServeMux()
-	registerFunc(m.mux)
+	registerFunc(m.mux, &middleware.NoAuthHandler{})
 	http.DefaultServeMux = m.mux
 
 	m.StartAPIServer()

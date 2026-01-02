@@ -3,7 +3,7 @@
   import UiButton from "./uiButton.svelte";
   import { DateTime } from "luxon";
   import TextArea from "./ui/textArea.svelte";
-  import InteractiveBox from "./ui/interactiveBox.svelte";
+  import Card from "./ui/card.svelte";
   import UiButtonLink from "./uiButtonLink.svelte";
 
   let {
@@ -50,7 +50,7 @@
   };
 </script>
 
-<InteractiveBox>
+<Card>
   <div class="flex flex-row justify-between">
     <a
       href="/{canEdit ? 'edit-menu' : 'menu'}?menu-id={menuId}"
@@ -101,7 +101,7 @@
       href="/admin/share-menu/?menu-id={menuId}"
     />
   </div>
-</InteractiveBox>
+</Card>
 
 <style>
   input {

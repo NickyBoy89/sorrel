@@ -3,7 +3,7 @@
 
   type BottomBarOption = {
     icon: Component;
-    optionName: string;
+    readonly optionName: string;
   };
 
   type BottomBarProps = {
@@ -19,12 +19,14 @@
 >
   {#each options as option}
     {@const OptionIcon = option.icon}
-    <OptionIcon
-      size={32}
-      weight={selected === option.optionName ? "fill" : "regular"}
-      class="cursor-pointer"
-      onclick={() => (selected = option.optionName)}
-    />
+    <a href={option.optionName}>
+      <OptionIcon
+        size={32}
+        weight={selected === option.optionName ? "fill" : "regular"}
+        class="cursor-pointer"
+        onclick={() => (selected = option.optionName)}
+      />
+    </a>
   {/each}
 </div>
 

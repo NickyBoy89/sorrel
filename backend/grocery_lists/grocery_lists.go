@@ -32,9 +32,9 @@ type CreateGroceryItem struct {
 }
 
 type UpdateGroceryItem struct {
-	Id       int    `json:"id"`
-	Quantity string `json:"quantity"`
-	Checked  bool   `json:"checked"`
+	IngredientId int    `json:"id"`
+	Quantity     string `json:"quantity"`
+	Checked      bool   `json:"checked"`
 }
 
 // Represents a single Ingredient in the library of ingredients
@@ -60,6 +60,7 @@ func RegisterHandlers(mux *http.ServeMux, auth middleware.AuthMiddleware) {
 // `handleGroceryListAction` handles the CRUD actions of a grocery list
 func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "*")
 
 	groceryId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
@@ -68,10 +69,28 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.Method {
-	// Get a grocery list
-	case http.MethodGet:
-		// Find what items are on the list
+	case http.MethodOptions:
+	case http.MethodPost:
+		defer r.Body.Close()
+		var item UpdateGroceryItem
 
+		if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if item.IngredientId == 0 || item.Quantity == "" {
+			http.Error(w, "one of the \"id\" or \"quantity\" fields were missing in the request input", http.StatusBadRequest)
+			return
+		}
+
+		if _, err := InsertGroceryListItem(item, groceryId, db.DB); err != nil {
+			log.Error("error inserting new grocery item", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+	case http.MethodGet: // Find what items are on the list
 		items, err := FindGroceryList(groceryId, db.DB)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
@@ -80,6 +99,7 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 			}
 			log.Error("error querying grocery items", "error", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 		if err := json.NewEncoder(w).Encode(items); err != nil {
@@ -133,12 +153,31 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if groceryListId, err := InsertGroceryList(db.DB); err != nil {
-		log.Error("error while creating new grocery list", "error", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	switch r.Method {
+	case http.MethodGet:
+		ids, err := FindGroceryLists(db.DB)
+		if err != nil {
+			log.Error("error while querying grocery lists", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(ids); err != nil {
+			log.Error("error while encoding grocery list ids", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	case http.MethodPost:
+		if groceryListId, err := InsertGroceryList(db.DB); err != nil {
+			log.Error("error while creating new grocery list", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		} else {
+			fmt.Fprintf(w, "%d", groceryListId)
+		}
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
-	} else {
-		fmt.Fprintf(w, "%d", groceryListId)
 	}
 }
 
@@ -180,23 +219,39 @@ func handleCreateIngredient(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	var item UpdateIngredient
+	switch r.Method {
+	case http.MethodGet:
+		ingredients, err := FindIngredients(db.DB)
+		if err != nil {
+			log.Error("error fetching ingredients", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		return
-	}
+		if err := json.NewEncoder(w).Encode(ingredients); err != nil {
+			log.Error("error encoding ingredients", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	case http.MethodPost:
+		var item UpdateIngredient
 
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+		if r.Method != http.MethodPost {
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
 
-	if id, err := InsertIngredient(item, db.DB); err != nil {
-		log.Error("error inserting ingredient", "error", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	} else {
-		fmt.Fprintf(w, "%d", id)
+		if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if id, err := InsertIngredient(item, db.DB); err != nil {
+			log.Error("error inserting ingredient", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		} else {
+			fmt.Fprintf(w, "%d", id)
+		}
 	}
 }
