@@ -28,7 +28,7 @@
 </script>
 
 <div
-  class="flex flex-row grow w-auto h-8 pl-2 rounded-sm bg-white dark:bg-neutral-900 border border-neutral-700 items-center"
+  class="flex flex-row grow w-auto min-h-8 pl-2 rounded-sm bg-white dark:bg-neutral-900 border border-neutral-700 items-center"
 >
   <div class="flex flex-col grow">
     <input
