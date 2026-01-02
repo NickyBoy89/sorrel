@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "keycloak-js": "^26.1.5",
-    "luxon": "^3.5.0"
+    "luxon": "^3.5.0",
+    "zod": "^4.3.4"
   }
 }

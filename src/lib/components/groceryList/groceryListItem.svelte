@@ -10,9 +10,11 @@
   let {
     ingredient,
     checked = $bindable(false),
+    ondelete,
   }: {
     ingredient: GroceryItem;
     checked?: boolean;
+    ondelete?: () => void;
   } = $props();
 </script>
 
@@ -33,11 +35,10 @@
       {ingredient.name}
     </div>
   </label>
-  <button
-    class="flex flex-col items-end"
-    onclick={() => (optionsOpen = !optionsOpen)}
-  >
-    <DotsThreeVertical class="text-xl" />
+  <div class="flex flex-col items-end">
+    <button onclick={() => (optionsOpen = !optionsOpen)}>
+      <DotsThreeVertical class="text-xl" />
+    </button>
     {#if optionsOpen}
       <div
         class="flex flex-col bg-neutral-800 rounded-md divide-y-1 divide-neutral-700"
@@ -46,13 +47,19 @@
           <div class="text-left grow">Edit Item</div>
           <PencilSimple />
         </div>
-        <div class="flex flex-row text-red-500 items-center gap-x-2 px-4 py-2">
+        <button
+          class="flex flex-row text-red-500 cursor-pointer items-center gap-x-2 px-4 py-2"
+          onclick={() => {
+            ondelete?.();
+            optionsOpen = false;
+          }}
+        >
           <div class="text-left grow">Delete Item</div>
           <Backspace />
-        </div>
+        </button>
       </div>
     {/if}
-  </button>
+  </div>
 </div>
 
 <style>
@@ -89,4 +96,3 @@
     color: var(--color-neutral-500);
   }
 </style>
-

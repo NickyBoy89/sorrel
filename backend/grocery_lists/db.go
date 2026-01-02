@@ -9,7 +9,8 @@ import (
 
 func InitializeDB(db *sql.DB) error {
 	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS grocery_lists(
-		id INTEGER PRIMARY KEY AUTOINCREMENT
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT DEFAULT 'Groceries'
 	);
 	`); err != nil {
 		return err
@@ -51,20 +52,20 @@ func InitializeDB(db *sql.DB) error {
 	return nil
 }
 
-func FindGroceryLists(db *sql.DB) ([]int, error) {
-	rows, err := db.Query("SELECT id FROM grocery_lists")
+func FindGroceryLists(db *sql.DB) ([]GroceryList, error) {
+	rows, err := db.Query("SELECT id, name FROM grocery_lists")
 	if err != nil {
 		return nil, err
 	}
 
-	listIds := []int{}
+	listIds := []GroceryList{}
 	for rows.Next() {
-		var listId int
-		if err := rows.Scan(&listId); err != nil {
+		var list GroceryList
+		if err := rows.Scan(&list.Id, &list.Name); err != nil {
 			return nil, err
 		}
 
-		listIds = append(listIds, listId)
+		listIds = append(listIds, list)
 	}
 
 	return listIds, nil
@@ -120,6 +121,14 @@ func InsertGroceryListItem(input UpdateGroceryItem, groceryListId int, db db.Dat
 	} else {
 		return resp.LastInsertId()
 	}
+}
+
+func DeleteGroceryListItem(groceryListId int, groceryListItemId int, db *sql.DB) error {
+	if _, err := db.Exec("DELETE FROM grocery_list_contents WHERE grocery_list_id = ? AND id = ?", groceryListId, groceryListItemId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func UpdateGroceryList(items []UpdateGroceryItem, groceryListId int, db *sql.DB) error {

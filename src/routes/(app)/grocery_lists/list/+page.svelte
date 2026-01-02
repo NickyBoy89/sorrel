@@ -57,8 +57,15 @@
 <div class="text-4xl ml-4 font-semibold">Groceries</div>
 <div class="flex flex-col">
   <ol class="divide-y divide-neutral-800 my-2">
-    {#each items as ingredient}
-      <GroceryListItem {ingredient} />
+    {#each items as ingredient, index}
+      <GroceryListItem
+        {ingredient}
+        ondelete={() =>
+          fetch(
+            `${APIUrl}/api/v1/grocery_list/${groceryListId}/item/${ingredient.id}`,
+            { method: "DELETE" },
+          ).then((_) => items.splice(index, 1))}
+      />
     {/each}
   </ol>
   <div class="flex flex-col md:flex-row grow gap-4 mx-4 items-center">
@@ -86,7 +93,7 @@
             quantity,
             checked: false,
           }),
-        })}
+        }).then((_) => fetchItems())}
     />
   </div>
 </div>

@@ -13,6 +13,11 @@ import (
 	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
 )
 
+type GroceryList struct {
+	Id   int     `json:"id"`
+	Name *string `json:"name,omitempty"`
+}
+
 type GroceryItem struct {
 	// The id of the item in the grocery list
 	Id int `json:"id"`
@@ -50,6 +55,7 @@ type UpdateIngredient struct {
 }
 
 func RegisterHandlers(mux *http.ServeMux, auth middleware.AuthMiddleware) {
+	mux.Handle("/api/v1/grocery_list/{id}/item/{itemId}", auth.RequireAuth(http.HandlerFunc(handleDeleteItem)))
 	mux.Handle("/api/v1/grocery_list/{id}", auth.RequireAuth(http.HandlerFunc(handleGroceryListAction)))
 	mux.Handle("/api/v1/grocery_list", auth.RequireAuth(http.HandlerFunc(handleCreateGroceryList)))
 
@@ -175,6 +181,38 @@ func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprintf(w, "%d", groceryListId)
 		}
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func handleDeleteItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "*")
+
+	groceryListId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	groceryItemId, err := strconv.Atoi(r.PathValue("itemId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodOptions:
+		return
+	case http.MethodDelete:
+		if err := DeleteGroceryListItem(groceryListId, groceryItemId, db.DB); err != nil {
+			log.Error("error while deleting item in grocery list", "error", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return

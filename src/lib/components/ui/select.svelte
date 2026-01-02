@@ -39,7 +39,7 @@
       onfocus={() => (expanded = true)}
       onblur={() => {
         // This needs to be delayed a bit, because if the user takes an action somewhere else, we need to give them a bit until we unexpand and remove the options
-        setTimeout(() => (expanded = false), 100);
+        setTimeout(() => (expanded = false), 200);
       }}
     />
     {#if expanded}
