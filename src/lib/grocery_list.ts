@@ -14,3 +14,11 @@ export const GroceryList = z.object({
   name: z.optional(z.string())
 })
 export type GroceryList = z.infer<typeof GroceryList>;
+
+
+export const Ingredient = z.object({
+  id: z.number(),
+  name: z.string(),
+  category: z.optional(z.string())
+})
+export type Ingredient = z.infer<typeof Ingredient>;

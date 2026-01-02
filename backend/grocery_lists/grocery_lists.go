@@ -131,7 +131,7 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 		// }
 		// defer tx.Rollback()
 
-		if err := UpdateGroceryList(groceryItems, groceryId, db.DB); err != nil {
+		if err := UpdateGroceryListItem(groceryItems, groceryId, db.DB); err != nil {
 			log.Error("Error updating grocery list", "error", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
@@ -142,6 +142,20 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 		// 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		// 	return
 		// }
+	case http.MethodPut:
+		defer r.Body.Close()
+
+		var list GroceryList
+		if err := json.NewDecoder(r.Body).Decode(&list); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := UpdateGroceryList(list, db.DB); err != nil {
+			log.Error("error while updating grocery list", "error", err, "id", list.Id)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 
 	// Delete a shopping list
 	case http.MethodDelete:
@@ -158,6 +172,7 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 
 func handleCreateGroceryList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "*")
 
 	switch r.Method {
 	case http.MethodGet:

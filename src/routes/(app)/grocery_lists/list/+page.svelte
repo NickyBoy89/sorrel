@@ -7,25 +7,12 @@
   import Select from "$lib/components/ui/select.svelte";
   import GroceryListItem from "$lib/components/groceryList/groceryListItem.svelte";
   import NavigationButton from "$lib/components/ui/navigationButton.svelte";
+  import type { GroceryItem, Ingredient } from "$lib/grocery_list";
 
   let selectedIngredientId = $state(0);
   let quantity = $state("");
 
   let groceryListId: string | null = null;
-
-  type GroceryItem = {
-    id: number;
-    name: string;
-    category: string | null;
-    quantity: string;
-    checked: boolean;
-  };
-
-  type Ingredient = {
-    id: number;
-    name: string;
-    category: string | null;
-  };
 
   let items: Array<GroceryItem> = $state([]);
 

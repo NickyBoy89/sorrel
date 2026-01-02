@@ -79,6 +79,14 @@ func InsertGroceryList(db *sql.DB) (int64, error) {
 	}
 }
 
+func UpdateGroceryList(list GroceryList, db *sql.DB) error {
+	if _, err := db.Exec("UPDATE grocery_lists SET name = ? WHERE id = ?", list.Name, list.Id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func FindGroceryList(groceryListId int, db *sql.DB) ([]GroceryItem, error) {
 	var count int
 	if err := db.QueryRow("SELECT 1 FROM grocery_lists WHERE id = ?", groceryListId).Scan(&count); err != nil {
@@ -131,7 +139,7 @@ func DeleteGroceryListItem(groceryListId int, groceryListItemId int, db *sql.DB)
 	return nil
 }
 
-func UpdateGroceryList(items []UpdateGroceryItem, groceryListId int, db *sql.DB) error {
+func UpdateGroceryListItem(items []UpdateGroceryItem, groceryListId int, db *sql.DB) error {
 	for _, item := range items {
 		if _, err := db.Exec("INSERT INTO grocery_list_contents (grocery_list_id, ingredient_id, quantity, checked) VALUES (?, ?, ?, ?)", groceryListId, item.IngredientId, item.Quantity, item.Checked); err != nil {
 			return err
