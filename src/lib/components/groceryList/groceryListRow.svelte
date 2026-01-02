@@ -1,26 +1,54 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import Card from "../ui/card.svelte";
+  import z from "zod";
   import { APIUrl } from "../../../constants";
+  import { type GroceryList, GroceryItem } from "$lib/grocery_list";
 
-  let { groceryListId } = $props();
+  import DotsThreeVertical from "phosphor-svelte/lib/DotsThreeVertical";
+  import UiButton from "../uiButton.svelte";
 
-  let itemCount = $state(-1);
+  let optionsOpen = $state(false);
 
-  onMount(() => {
-    fetch(`${APIUrl}/api/v1/grocery_list/${groceryListId}`)
+  let { list, ondelete }: { list: GroceryList; ondelete?: () => void } =
+    $props();
+
+  const fetchList = async (listId: number) => {
+    return fetch(`${APIUrl}/api/v1/grocery_list/${listId}`)
       .then((resp) => resp.json())
-      .then((respJson) => (itemCount = respJson.size))
-      .catch((error) => console.error(error));
-  });
+      .then((resp) => z.array(GroceryItem).parse(resp));
+  };
 </script>
 
-<Card>
-  <a href="/grocery_list/?id={groceryListId}">
-    <div class="flex flex-row justify-between items-center">
-      <div class="text-xl font-semibold">Groceries</div>
-      <div class="text-md">{itemCount} remaining</div>
+<div class="rounded-md bg-white dark:bg-zinc-800 border border-zinc-700">
+  <div class="flex flex-col divide-y divide-neutral-700">
+    <div class="flex flex-row items-center px-4 py-4">
+      <a
+        href="/grocery_lists/list?id={list.id}"
+        class="flex flex-row w-full gap-x-2"
+      >
+        <h2 class="font-mono text-xl font-semibold">{list.name}</h2>
+        <div class="grow">
+          &mdash; {#await fetchList(list.id)}-{:then items}{items.length}{:catch error}{error.message}{/await}
+          items
+        </div>
+      </a>
+      <button
+        class="text-2xl cursor-pointer"
+        onclick={() => (optionsOpen = !optionsOpen)}
+      >
+        <DotsThreeVertical />
+      </button>
     </div>
-  </a>
-</Card>
-
+    {#if optionsOpen}
+      <div class="flex flex-row justify-between p-4">
+        <UiButton
+          text="Delete"
+          color="red"
+          action={() =>
+            fetch(`${APIUrl}/api/v1/grocery_list/${list.id}`, {
+              method: "DELETE",
+            }).then(ondelete)}
+        />
+      </div>
+    {/if}
+  </div>
+</div>
