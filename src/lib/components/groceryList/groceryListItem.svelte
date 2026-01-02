@@ -1,52 +1,92 @@
 <script lang="ts">
-  let { text, checked = false } = $props();
+  import DotsThreeVertical from "phosphor-svelte/lib/DotsThreeVertical";
+  import Backspace from "phosphor-svelte/lib/Backspace";
+  import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+
+  import type { GroceryItem } from "$lib/grocery_list";
+
+  let optionsOpen = $state(false);
+
+  let {
+    ingredient,
+    checked = $bindable(false),
+  }: {
+    ingredient: GroceryItem;
+    checked?: boolean;
+  } = $props();
 </script>
 
-<form class="">
-    <label class="flex flex-row space-x-2 cursor-pointer select-none align-middle font-semibolds">
-    <input type="checkbox" name="checked" id="checked" class="circle-checkbox cursor-pointer my-auto" checked={checked}>
-    <span class="align-middle text-lg w-full grocery-item-text header-underlined py-2">{text}</span>
-    </label>
-</form>
+<div class="flex flex-row items-center py-4">
+  <label class="flex flex-row grow space-x-2">
+    <input
+      type="checkbox"
+      id="checkbox"
+      class={[
+        "h-6 w-6 border border-neutral-700 rounded-full cursor-pointer",
+        "circle-checkbox",
+        { checked },
+      ]}
+      bind:checked
+    />
+    <div class="flex grocery-item-text">
+      {ingredient.quantity}
+      {ingredient.name}
+    </div>
+  </label>
+  <button
+    class="flex flex-col items-end"
+    onclick={() => (optionsOpen = !optionsOpen)}
+  >
+    <DotsThreeVertical class="text-xl" />
+    {#if optionsOpen}
+      <div
+        class="flex flex-col bg-neutral-800 rounded-md divide-y-1 divide-neutral-700"
+      >
+        <div class="flex flex-row items-center gap-x-2 px-4 py-2">
+          <div class="text-left grow">Edit Item</div>
+          <PencilSimple />
+        </div>
+        <div class="flex flex-row text-red-500 items-center gap-x-2 px-4 py-2">
+          <div class="text-left grow">Delete Item</div>
+          <Backspace />
+        </div>
+      </div>
+    {/if}
+  </button>
+</div>
 
 <style>
-    .circle-checkbox {
-      appearance: none;
-      width: 1.25rem;
-      height: 1.25rem;
-      border: 0.1em solid var(--color-neutral-700);
-      border-radius: 50%;
-      cursor: pointer;
-      position: relative;
-      transition: background 0.1s, border 0.1s;
-    }
+  .circle-checkbox {
+    appearance: none;
+    position: relative;
+    transition:
+      background 0.1s,
+      border 0.1s;
+  }
 
-    .circle-checkbox:checked {
-      background: #d65d0e;
-      border: 2px solid #d65d0e;
-    }
+  .circle-checkbox:checked {
+    background: #d65d0e;
+    border: 2px solid #d65d0e;
+  }
 
-    .circle-checkbox:checked::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0.35em;
-      height: 0.65em;
-      border: solid white;
-      border-width: 0 0.15em 0.15em 0;
-      transform: translate(-50%, -55%) rotate(45deg);
-    }
+  .circle-checkbox:checked::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.35em;
+    height: 0.65em;
+    border: solid white;
+    border-width: 0 0.15em 0.15em 0;
+    transform: translate(-50%, -55%) rotate(45deg);
+  }
 
-    .grocery-item-text {
-        transition: color 0.1s;
-    }
+  .grocery-item-text {
+    transition: color 0.1s;
+  }
 
-    .circle-checkbox:checked ~ .grocery-item-text {
-        color: var(--color-neutral-500);
-    }
-
-    .header-underlined {
-        border-bottom: 1px solid var(--color-neutral-800);
-    }
+  .circle-checkbox:checked ~ .grocery-item-text {
+    color: var(--color-neutral-500);
+  }
 </style>
+

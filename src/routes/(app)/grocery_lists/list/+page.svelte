@@ -5,6 +5,8 @@
   import UiButton from "$lib/components/uiButton.svelte";
   import TextArea from "$lib/components/ui/textArea.svelte";
   import Select from "$lib/components/ui/select.svelte";
+  import GroceryListItem from "$lib/components/groceryList/groceryListItem.svelte";
+  import NavigationButton from "$lib/components/ui/navigationButton.svelte";
 
   let selectedIngredientId = $state(0);
   let quantity = $state("");
@@ -51,15 +53,15 @@
   });
 </script>
 
+<NavigationButton text="All lists" href="/grocery_lists/" />
+<div class="text-4xl ml-4 font-semibold">Groceries</div>
 <div class="flex flex-col">
-  <ol>
+  <ol class="divide-y divide-neutral-800 my-2">
     {#each items as ingredient}
-      <div>
-        Id: {ingredient.id}, Name: {ingredient.name}, Quantity: {ingredient.quantity}
-      </div>
+      <GroceryListItem {ingredient} />
     {/each}
   </ol>
-  <div class="flex flex-row grow gap-x-4 mx-4 items-center">
+  <div class="flex flex-col md:flex-row grow gap-4 mx-4 items-center">
     <Select
       placeholder="Select or add an ingredient"
       options={ingredientOptions.map((ing) => ({
