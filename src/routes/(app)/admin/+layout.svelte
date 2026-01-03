@@ -6,14 +6,11 @@
     handleSubscribe,
     isSubscriptionValid,
   } from "$lib/notificationManager";
-  import { initKeycloak } from "$lib/auth";
   let { children } = $props();
 
   let userId;
 
   onMount(() => {
-    initKeycloak();
-
     userId = localStorage.getItem("userId");
     if (userId === null) {
       goto("/login");

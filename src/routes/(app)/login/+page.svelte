@@ -1,7 +1,7 @@
 <script lang="ts">
   import { handleSubscribe } from "$lib/notificationManager";
   import { goto } from "$app/navigation";
-  import { Bell } from "phosphor-svelte";
+  import Bell from "phosphor-svelte/lib/Bell";
 
   let statusMessage = $state("");
   let statusBorder = $state("var(--color-zinc-700)");
@@ -144,4 +144,3 @@
     padding-right: 1rem;
   }
 </style>
-

@@ -3,7 +3,7 @@
   import MenuItemEditor from "$lib/components/menuItemEditor.svelte";
   import UiButton from "$lib/components/uiButton.svelte";
   import Navbar from "$lib/components/navbar.svelte";
-  import { APIUrl, menuDefaultSections } from "../../../constants.js";
+  import { APIUrl } from "../../../constants.js";
 
   import { page } from "$app/state";
   import { onMount } from "svelte";
@@ -51,7 +51,7 @@
 
     items.forEach((menuItem) => {
       const sectionName = toUppercase(
-        menuItem.section == null ? menuDefaultSections : menuItem.section,
+        menuItem.section == null ? "Mains" : menuItem.section,
       );
       if (!sections.has(sectionName)) {
         sections.set(sectionName, []);

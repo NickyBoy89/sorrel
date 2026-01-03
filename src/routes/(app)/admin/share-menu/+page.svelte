@@ -1,9 +1,10 @@
 <script lang="ts">
   import UiButton from "$lib/components/uiButton.svelte";
   import { onMount, type Component } from "svelte";
-  import { Check, Spinner, X } from "phosphor-svelte";
+  import Check from "phosphor-svelte/lib/Check";
+  import Spinner from "phosphor-svelte/lib/Spinner";
+  import X from "phosphor-svelte/lib/X";
   import { APIUrl } from "../../../../constants";
-  import { get } from "svelte/store";
   import { page } from "$app/state";
 
   type User = {
