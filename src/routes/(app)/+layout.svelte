@@ -38,6 +38,7 @@
   options={[
     { icon: House, optionName: "/" as const },
     { icon: List, optionName: "/grocery_lists" as const },
+    { icon: User, optionName: "/profile" as const },
   ] as const}
   selected={"home"}
 />

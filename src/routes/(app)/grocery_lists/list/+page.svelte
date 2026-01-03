@@ -43,7 +43,7 @@
 <NavigationButton text="All lists" href="/grocery_lists/" />
 <div class="text-4xl ml-4 font-semibold">Groceries</div>
 <div class="flex flex-col">
-  <ol class="divide-y divide-neutral-800 my-2">
+  <ol class="divide-y divide-neutral-800 m-2">
     {#each items as ingredient, index}
       <GroceryListItem
         {ingredient}
