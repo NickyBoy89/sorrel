@@ -1,6 +1,6 @@
 <script lang="ts">
   import { APIUrl } from "../../constants";
-  import InteractiveBox from "./ui/interactiveBox.svelte";
+  import Card from "$lib/components/ui/card.svelte";
   import TextArea from "./ui/textArea.svelte";
   import UiButton from "./uiButton.svelte";
 
@@ -41,7 +41,7 @@
   };
 </script>
 
-<InteractiveBox>
+<Card>
   <div class="flex flex-row justify-between items-center">
     <select
       name="edit-item-section"
@@ -81,7 +81,7 @@
       updateValues();
     }}
   />
-</InteractiveBox>
+</Card>
 
 <style>
   select {
@@ -98,4 +98,3 @@
     }
   }
 </style>
-

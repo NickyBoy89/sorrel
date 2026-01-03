@@ -11,6 +11,7 @@ import (
 
 	"github.com/NickyBoy89/sorrel/backend/internal/db"
 	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
+	"github.com/NickyBoy89/sorrel/backend/internal/push"
 )
 
 type GroceryList struct {
@@ -57,6 +58,7 @@ type UpdateIngredient struct {
 func RegisterHandlers(mux *http.ServeMux, auth middleware.AuthMiddleware) {
 	mux.Handle("/api/v1/grocery_list/{id}/item/{itemId}", auth.RequireAuth(http.HandlerFunc(handleDeleteItem)))
 	mux.Handle("/api/v1/grocery_list/{id}", auth.RequireAuth(http.HandlerFunc(handleGroceryListAction)))
+	mux.Handle("/api/v1/grocery_list/{id}/share", auth.RequireAuth(http.HandlerFunc(handleShareGroceryList)))
 	mux.Handle("/api/v1/grocery_list", auth.RequireAuth(http.HandlerFunc(handleCreateGroceryList)))
 
 	mux.Handle("/api/v1/ingredients/{id}", auth.RequireAuth(http.HandlerFunc(handleIngredientAction)))
@@ -166,6 +168,61 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func handleShareGroceryList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	groceryId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tx, err := db.DB.Begin()
+	if err != nil {
+		log.Error("error beginning transaction", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	defer r.Body.Close()
+
+	users := []int{}
+	if err := json.NewDecoder(r.Body).Decode(&users); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	msg := push.PushMessage{
+		Message:   fmt.Sprintf("%s has shared a grocery list with you: %s", "Nicholas Novak", "Groceries"),
+		ActionUrl: fmt.Sprintf("/grocery_lists/list/?id=%d", 1),
+	}
+
+	resp := make(map[int]bool)
+
+	for _, userId := range users {
+		if sent, err := push.SendNotificationToUser(tx, userId, msg); err != nil {
+			log.Error("error sharing list with user", "error", err, "userId", userId, "groceryListId", groceryId)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		} else {
+			resp[userId] = sent
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Error("error committing notification changes", "error", err)
+		http.Error(w, "error committing notification changes", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Error("error encoding menu share response", "error", err)
+		http.Error(w, "error encoding response", http.StatusInternalServerError)
 		return
 	}
 }

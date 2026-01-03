@@ -19,6 +19,7 @@ import (
 	"github.com/NickyBoy89/sorrel/backend/internal/db"
 	"github.com/NickyBoy89/sorrel/backend/internal/handlers"
 	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
+	"github.com/NickyBoy89/sorrel/backend/internal/push"
 	"github.com/SherClockHolmes/webpush-go"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -157,10 +158,13 @@ func readConfigFile(fileName string) error {
 			}
 
 			// Assign to global variables
-			priv, pub, err = webpush.GenerateVAPIDKeys()
+			priv, pub, err := webpush.GenerateVAPIDKeys()
 			if err != nil {
 				return err
 			}
+
+			push.Pub = pub
+			push.InitializePrivateKey(priv)
 
 			conf := config.Config{
 				PrivateKey: priv,
@@ -186,8 +190,8 @@ func readConfigFile(fileName string) error {
 		return err
 	}
 
-	priv = conf.PrivateKey
-	pub = conf.PublicKey
+	push.InitializePrivateKey(conf.PrivateKey)
+	push.Pub = conf.PublicKey
 
 	return nil
 }
