@@ -57,9 +57,9 @@ type UpdateIngredient struct {
 
 func RegisterHandlers(mux *http.ServeMux, auth middleware.AuthMiddleware) {
 	mux.Handle("/api/v1/grocery_list/{id}/item/{itemId}", auth.RequireAuth(http.HandlerFunc(handleDeleteItem)))
-	mux.Handle("/api/v1/grocery_list/{id}", auth.RequireAuth(http.HandlerFunc(handleGroceryListAction)))
+	mux.Handle("/api/v1/grocery_list/{id}", http.HandlerFunc(handleGroceryListAction))
 	mux.Handle("/api/v1/grocery_list/{id}/share", auth.RequireAuth(http.HandlerFunc(handleShareGroceryList)))
-	mux.Handle("/api/v1/grocery_list", auth.RequireAuth(http.HandlerFunc(handleCreateGroceryList)))
+	mux.Handle("/api/v1/grocery_list", http.HandlerFunc(handleCreateGroceryList))
 
 	mux.Handle("/api/v1/ingredients/{id}", auth.RequireAuth(http.HandlerFunc(handleIngredientAction)))
 	mux.Handle("/api/v1/ingredients", auth.RequireAuth(http.HandlerFunc(handleCreateIngredient)))
@@ -99,7 +99,7 @@ func handleGroceryListAction(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case http.MethodGet: // Find what items are on the list
-		items, err := FindGroceryList(groceryId, db.DB)
+		items, err := FindGroceryListItems(groceryId, db.DB)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -197,8 +197,20 @@ func handleShareGroceryList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	list, err := FindGroceryList(groceryId, tx)
+	if err != nil {
+		log.Error("error fetching grocery list", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	listName := "Groceries"
+	if list.Name != nil {
+		listName = *list.Name
+	}
+
 	msg := push.PushMessage{
-		Message:   fmt.Sprintf("%s has shared a grocery list with you: %s", "Nicholas Novak", "Groceries"),
+		Message:   fmt.Sprintf("A grocery list has been shared with you: %s", listName),
 		ActionUrl: fmt.Sprintf("/grocery_lists/list/?id=%d", 1),
 	}
 

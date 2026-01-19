@@ -87,7 +87,16 @@ func UpdateGroceryList(list GroceryList, db *sql.DB) error {
 	return nil
 }
 
-func FindGroceryList(groceryListId int, db *sql.DB) ([]GroceryItem, error) {
+func FindGroceryList(groceryListId int, db db.DatabaseLike) (GroceryList, error) {
+	list := GroceryList{Id: groceryListId}
+	if err := db.QueryRow("SELECT name FROM grocery_lists WHERE id = ?", groceryListId).Scan(&list.Name); err != nil {
+		return list, err
+	}
+
+	return list, nil
+}
+
+func FindGroceryListItems(groceryListId int, db db.DatabaseLike) ([]GroceryItem, error) {
 	var count int
 	if err := db.QueryRow("SELECT 1 FROM grocery_lists WHERE id = ?", groceryListId).Scan(&count); err != nil {
 		return nil, err
