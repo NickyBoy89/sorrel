@@ -29,15 +29,19 @@ func NewAuthHandler(authClient *auth.Client) *OIDCAuthHandler {
 }
 
 // generateRandomSecureString creates a random secure string
-func generateRandomSecureString() (string, error) {
+func generateRandomSecureString() (RandomState, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	return base64.URLEncoding.EncodeToString(b), nil
+	return RandomState(base64.URLEncoding.EncodeToString(b)), nil
 }
 
-var authStore = make(map[string]bool)
+// Stores some state in the time between login and the callback
+type RandomState string
+type Referrer string
+
+var authStore = make(map[RandomState]Referrer)
 
 var SessionStore = make(map[string]auth.SessionData)
 
@@ -57,11 +61,11 @@ func (a *OIDCAuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store state in session for later verification
-	authStore[state] = true
+	authStore[state] = Referrer(r.Referer())
 
 	// Build authentication URL
 	authURL := a.authClient.Oauth.AuthCodeURL(
-		state,
+		string(state),
 		oauth2.SetAuthURLParam("response_type", "code"),
 		oauth2.SetAuthURLParam("scope", "openid profile email"),
 	)
@@ -71,17 +75,22 @@ func (a *OIDCAuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *OIDCAuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
-
 	if err := r.ParseForm(); err != nil {
 		slog.Error("failed to parse form values for callback", "error", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	if err := a.validateStateSession(r); err != nil {
+	redirectAfterCallback, err := a.validateStateSession(r)
+	if err != nil {
 		slog.Error("failed to validate state session", "error", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
+	}
+
+	// If no redirect was specified, redirect to the home page
+	if redirectAfterCallback == "" {
+		redirectAfterCallback = "/"
 	}
 
 	oauthToken, err := a.tokenExchange(r)
@@ -114,12 +123,12 @@ func (a *OIDCAuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request
 		CreatedAt: time.Now(),
 	}
 	// Store session
-	SessionStore[sessionID] = sessionData
+	SessionStore[string(sessionID)] = sessionData
 
 	cookie := http.Cookie{
 		Name:     "session_id",
-		Value:    sessionID,
-		MaxAge:   60, // A minute
+		Value:    string(sessionID),
+		MaxAge:   int((time.Minute * 10) / time.Second), // 10 Minutes
 		Path:     "/",
 		Secure:   true, // Disabled for development
 		HttpOnly: true,
@@ -127,7 +136,7 @@ func (a *OIDCAuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request
 	}
 	http.SetCookie(w, &cookie)
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, string(redirectAfterCallback), http.StatusTemporaryRedirect)
 }
 
 type oidcClaims struct {
@@ -170,20 +179,21 @@ func (a *OIDCAuthHandler) tokenExchange(r *http.Request) (*oauth2.Token, error) 
 	return oauth2Token, nil
 }
 
-func (a *OIDCAuthHandler) validateStateSession(r *http.Request) error {
+func (a *OIDCAuthHandler) validateStateSession(r *http.Request) (Referrer, error) {
 	// Get state from callback parameters
 	stateParam := r.Form.Get("state")
 	if stateParam == "" {
-		return errors.New("missing state parameter in callback")
+		return "", errors.New("missing state parameter in callback")
 	}
 
 	// Validate state match
-	if _, ok := authStore[stateParam]; !ok {
-		return errors.New("state parameter mismatch")
+	if redirectUrl, ok := authStore[RandomState(stateParam)]; !ok {
+		return "", errors.New("state parameter mismatch")
+	} else {
+
+		// Clean up used state from store
+		delete(authStore, RandomState(stateParam))
+
+		return redirectUrl, nil
 	}
-
-	// Clean up used state from store
-	delete(authStore, stateParam)
-
-	return nil
 }
