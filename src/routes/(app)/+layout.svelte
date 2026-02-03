@@ -10,6 +10,7 @@
   import House from "phosphor-svelte/lib/House";
   import User from "phosphor-svelte/lib/User";
   import List from "phosphor-svelte/lib/List";
+  import Oven from "phosphor-svelte/lib/Oven";
   let { children } = $props();
 
   let userId;
@@ -37,6 +38,7 @@
 <BottomBar
   options={[
     { icon: House, optionName: "/" as const },
+    { icon: Oven, optionName: "/recipes" as const },
     { icon: List, optionName: "/grocery_lists" as const },
     { icon: User, optionName: "/profile" as const },
   ] as const}

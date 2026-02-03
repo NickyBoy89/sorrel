@@ -43,11 +43,13 @@ type UpdateGroceryItem struct {
 	Checked      bool   `json:"checked"`
 }
 
+type IngredientId int64
+
 // Represents a single Ingredient in the library of ingredients
 type Ingredient struct {
-	Id       int     `json:"id"`
-	Name     string  `json:"name"`
-	Category *string `json:"category,omitempty"`
+	Id       IngredientId `json:"id"`
+	Name     string       `json:"name"`
+	Category *string      `json:"category,omitempty"`
 }
 
 type UpdateIngredient struct {
@@ -314,7 +316,7 @@ func handleIngredientAction(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		ing, err := FindIngredient(ingredientId, db.DB)
+		ing, err := FindIngredient(IngredientId(ingredientId), db.DB)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

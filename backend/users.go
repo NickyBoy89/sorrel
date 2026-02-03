@@ -48,7 +48,7 @@ func handleGetUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleListUsers(w http.ResponseWriter, r *http.Request) {
+func handleListUsers(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	users, err := db.DB.Query("SELECT id, display_name FROM users")

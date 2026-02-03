@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	grocerylists "github.com/NickyBoy89/sorrel/backend/grocery_lists"
+	"github.com/NickyBoy89/sorrel/backend/recipes"
 )
 
 func initDb(db *sql.DB) error {
@@ -61,6 +62,11 @@ func initDb(db *sql.DB) error {
 
 	// Grocery lists
 	if err := grocerylists.InitializeDB(db); err != nil {
+		return err
+	}
+
+	// Recipes
+	if err := recipes.InitializedDb(db); err != nil {
 		return err
 	}
 

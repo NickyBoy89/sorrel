@@ -20,6 +20,7 @@ import (
 	"github.com/NickyBoy89/sorrel/backend/internal/handlers"
 	"github.com/NickyBoy89/sorrel/backend/internal/middleware"
 	"github.com/NickyBoy89/sorrel/backend/internal/push"
+	"github.com/NickyBoy89/sorrel/backend/recipes"
 	"github.com/SherClockHolmes/webpush-go"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -129,10 +130,13 @@ var serveCommand = &cobra.Command{
 		// Grocery lists
 		grocerylists.RegisterHandlers(http.DefaultServeMux, authMiddleware)
 
+		// Recipes
+		recipes.RegisterHandlers(http.DefaultServeMux, authMiddleware)
+
 		// User
 		http.HandleFunc("/api/validate-id", handleCheckUserId)
 		http.HandleFunc("/api/users", authMiddleware.RequireAuth(http.HandlerFunc(handleListUsers)))
-		http.HandleFunc("/api/user", handleGetUser)
+		http.Handle("/api/v1/user", authMiddleware.RequireAuth(http.HandlerFunc(handleGetUser)))
 
 		// Push
 		http.HandleFunc("/api/push/public-key", handleVAPIDPublicKeyRequest)

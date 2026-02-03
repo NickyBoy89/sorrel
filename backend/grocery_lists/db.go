@@ -166,7 +166,7 @@ func FindIngredients(db *sql.DB) ([]Ingredient, error) {
 
 	ingredients := []Ingredient{}
 	for rows.Next() {
-		var ingredientId int
+		var ingredientId IngredientId
 		if err := rows.Scan(&ingredientId); err != nil {
 			return nil, err
 		}
@@ -189,7 +189,7 @@ func InsertIngredient(val UpdateIngredient, db *sql.DB) (int64, error) {
 	}
 }
 
-func FindIngredient(ingredientId int, db *sql.DB) (Ingredient, error) {
+func FindIngredient(ingredientId IngredientId, db *sql.DB) (Ingredient, error) {
 	ingredient := Ingredient{Id: ingredientId}
 
 	if err := db.QueryRow("SELECT name, category FROM ingredients WHERE id = ?", ingredientId).Scan(&ingredient.Name, &ingredient.Category); err != nil {
