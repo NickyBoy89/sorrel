@@ -1,0 +1,5 @@
+processes:
+  frontend:
+    command: "yarn dev"
+  backend:
+    command: "./backend/backend serve"
