@@ -11,3 +11,9 @@ export const Recipe = z.object({
   ingredients: z.array(GroceryItem),
 });
 export type Recipe = z.TypeOf<typeof Recipe>;
+
+const { id: _, ...createRecipeInput } = Recipe.shape;
+export const CreateRecipeInput = z.object({
+  ...createRecipeInput
+})
+export type CreateRecipeInput = z.TypeOf<typeof CreateRecipeInput>;
