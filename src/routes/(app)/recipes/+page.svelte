@@ -26,15 +26,19 @@
 
   const api = new Recipes(APIUrl);
 
+  const updateRecipes = async () => {
+    const recipeIds = await api.findAllIds();
+
+    recipes = await Promise.all(recipeIds.map(api.find.bind(api)));
+  };
+
   onMount(async () => {
     const recipeIdParam = page.url.searchParams.get("id");
     if (recipeIdParam !== null) {
       recipeId = RecipeId.decode(Number.parseInt(recipeIdParam));
     }
 
-    const recipeIds = await api.findAllIds();
-
-    recipes = await Promise.all(recipeIds.map(api.find.bind(api)));
+    await updateRecipes();
   });
 
   let createdRecipeName: string = $state("");
@@ -67,6 +71,8 @@
           });
 
           createRecipeModalVisible = false;
+
+          void updateRecipes();
         }}
         text="Create"
       />
