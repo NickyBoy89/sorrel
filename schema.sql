@@ -22,12 +22,3 @@ CREATE TABLE recipe_step (
   sequence_number INTEGER NOT NULL,
   FOREIGN KEY(recipe_id) REFERENCES recipes(id)
 );
-
--- name: GetRecipe :one
-SELECT * FROM recipes WHERE id = ?;
-
--- name: GetRecipeIngredients :many
-SELECT * FROM recipe_ingredients WHERE recipe_id = ?;
-
--- name: FindRecipes :many
-SELECT * FROM recipes ORDER BY id;
