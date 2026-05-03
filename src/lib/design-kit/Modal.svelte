@@ -21,20 +21,17 @@
 
 <button
   class={[
-    "fixed left-0 top-0 w-full h-full bg-neutral-500/25 flex items-center justify-center z-50",
+    "fixed left-0 top-0 w-full h-full bg-neutral-500/25 flex items-center justify-center",
     { hidden: !visible },
   ]}
   onclick={handleClose}
   onkeydown={handleKeyDown}
   aria-label="Close modal"
-></button>
+>
+</button>
 
 <div class={["fixed center", { hidden: !visible }]}>
-  <div
-    class="flex flex-col mx-auto p-4 space-y-2 bg-neutral-900 rounded-md shadow-lg"
-  >
-    {@render children?.()}
-  </div>
+  {@render children?.()}
 </div>
 
 <style>

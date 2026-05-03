@@ -1,15 +1,22 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import type { ClassValue } from "svelte/elements";
 
   type CardProps = {
-    children: Snippet;
+    children?: Snippet;
+    fixed?: boolean;
+    class?: ClassValue;
   };
 
-  let { children }: CardProps = $props();
+  let { children, class: classValue, fixed = false }: CardProps = $props();
 </script>
 
 <div
-  class="flex w-32 h-24 rounded-lg bg-neutral-700 items-center justify-center"
+  class={[
+    "flex rounded-lg bg-neutral-700 items-center justify-center",
+    { "w-32": fixed, "h-24": fixed },
+    classValue,
+  ]}
 >
-  {@render children()}
+  {@render children?.()}
 </div>
