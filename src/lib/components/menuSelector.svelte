@@ -2,7 +2,7 @@
   import { APIUrl } from "../../constants";
   import UiButton from "./uiButton.svelte";
   import { DateTime } from "luxon";
-  import TextArea from "./ui/textArea.svelte";
+  import TextField from "$lib/design-kit/form-fields/TextField.svelte";
   import Card from "./ui/card.svelte";
   import UiButtonLink from "./uiButtonLink.svelte";
 
@@ -72,7 +72,7 @@
   <div class="menu-editor {editorOpen ? '' : 'hidden'} flex-col">
     <div>
       <label for="edit-menu-name">Name:</label>
-      <TextArea onchange={handleMenuChange} bind:initialValue={name} />
+      <TextField onchange={handleMenuChange} bind:initialValue={name} />
       <label for="edit-menu-date">Date:</label>
       <input
         type="date"
