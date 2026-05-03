@@ -3,11 +3,11 @@
   import { onMount } from "svelte";
   import { APIUrl } from "../../../../constants";
   import UiButton from "$lib/components/uiButton.svelte";
-  import TextArea from "$lib/components/ui/textArea.svelte";
   import Select from "$lib/components/ui/select.svelte";
   import GroceryListItem from "$lib/components/groceryList/groceryListItem.svelte";
   import NavigationButton from "$lib/components/ui/navigationButton.svelte";
   import type { GroceryItem, Ingredient } from "$lib/grocery_list";
+  import TextField from "$lib/design-kit/form-fields/TextField.svelte";
 
   let selectedIngredientId = $state(0);
   let quantity = $state("");
@@ -66,7 +66,7 @@
         selectedIngredientId = Number.parseInt(selectedValue);
       }}
     />
-    <TextArea
+    <TextField
       placeholder="Quantity..."
       onchange={(e) => (quantity = e.currentTarget.value)}
     />
