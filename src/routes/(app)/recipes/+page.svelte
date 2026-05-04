@@ -4,7 +4,6 @@
   import { APIUrl } from "../../../constants";
   import { Recipe, RecipeId } from "$lib/recipe";
   import { page } from "$app/state";
-  import GroceryListItem from "$lib/components/groceryList/groceryListItem.svelte";
   import Modal from "$lib/design-kit/Modal.svelte";
   import Card from "$lib/design-kit/Card.svelte";
   import { Recipes } from "$lib/api/recipe";
@@ -18,7 +17,6 @@
   };
 
   let recipeId: RecipeId | null = $state(null);
-  let currentRecipe: Recipe | null = $state(null);
 
   let recipes: Recipe[] = $state([]);
 
@@ -46,10 +44,7 @@
 
 {#snippet recipeCard(data: RecipeCard)}
   <a
-    href="/recipes?id={data.id}"
-    onclick={async () => {
-      (recipeId = data.id), (currentRecipe = await api.find(data.id));
-    }}
+    href="/recipes/recipe?id={data.id}"
     class="flex flex-col text-center m-4 cursor-pointer"
   >
     <Card class="w-32 h-24 {data.color}" />
@@ -98,13 +93,3 @@
     })}
   {/each}
 </div>
-
-{#if currentRecipe !== null}
-  <div class="flex flex-col">
-    <div class="font-semibold text-4xl mb-4">{currentRecipe.name}</div>
-    <div class="font-semibold text-xl mt-4">Ingredients</div>
-    {#each currentRecipe.ingredients as ingredient}
-      <GroceryListItem {ingredient} />
-    {/each}
-  </div>
-{/if}
